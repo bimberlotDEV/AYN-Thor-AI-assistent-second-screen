@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import com.gameside.core.design.GameSideTheme
 import com.gameside.device.CompanionLaunchResult
 import com.gameside.device.SecondaryDisplayLauncher
+import com.gameside.device.GameLauncher
 import com.gameside.features.home.GameSideHomeRoute
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var displayLauncher: SecondaryDisplayLauncher
+    @Inject lateinit var gameLauncher: GameLauncher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +26,7 @@ class MainActivity : ComponentActivity() {
                 GameSideHomeRoute(
                     onLaunchCompanion = { displayId -> launchCompanion(displayId) },
                     onOpenSingleScreen = { launchCompanion(null) },
+                    onLaunchGame = { packageName -> gameLauncher.launchOnPrimary(this, packageName) },
                 )
             }
         }

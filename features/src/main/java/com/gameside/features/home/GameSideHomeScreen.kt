@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gameside.device.CompanionLaunchResult
+import com.gameside.device.GameLaunchResult
 import com.gameside.features.chat.ChatRoute
 import com.gameside.features.game.GameLibraryRoute
 import com.gameside.features.onboarding.OnboardingScreen
@@ -38,6 +39,7 @@ import com.gameside.features.wiki.WikiRoute
 fun GameSideHomeRoute(
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
+    onLaunchGame: (String) -> GameLaunchResult,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -48,7 +50,7 @@ fun GameSideHomeRoute(
             verticalArrangement = Arrangement.Center,
         ) { CircularProgressIndicator() }
         HomeState.Onboarding -> OnboardingScreen(onComplete = viewModel::completeOnboarding)
-        is HomeState.Content -> HomeContent(onLaunchCompanion, onOpenSingleScreen)
+        is HomeState.Content -> HomeContent(onLaunchCompanion, onOpenSingleScreen, onLaunchGame)
     }
 }
 
@@ -56,6 +58,7 @@ fun GameSideHomeRoute(
 private fun HomeContent(
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
+    onLaunchGame: (String) -> GameLaunchResult,
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     Scaffold(
@@ -100,7 +103,7 @@ private fun HomeContent(
             0 -> ChatRoute(Modifier.padding(padding))
             1 -> WikiRoute(Modifier.padding(padding))
             2 -> PersonalToolsRoute(Modifier.padding(padding))
-            3 -> GameLibraryRoute(Modifier.padding(padding))
+            3 -> GameLibraryRoute(onLaunchGame, Modifier.padding(padding))
             else -> MoreRoute(onLaunchCompanion, onOpenSingleScreen, Modifier.padding(padding))
         }
     }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.PushPin
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -47,9 +48,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gameside.domain.game.GamePlatform
 import com.gameside.domain.game.GameProfile
 import com.gameside.domain.game.SpoilerLevel
+import com.gameside.device.GameLaunchResult
 
 @Composable
 fun GameLibraryRoute(
+    onLaunchGame: (String) -> GameLaunchResult,
     modifier: Modifier = Modifier,
     viewModel: GameLibraryViewModel = viewModel(),
 ) {
@@ -62,6 +65,7 @@ fun GameLibraryRoute(
         onSetActive = viewModel::setActive,
         onTogglePin = viewModel::togglePin,
         onDelete = viewModel::delete,
+        onLaunchGame = onLaunchGame,
     )
 }
 
@@ -74,9 +78,11 @@ private fun GameLibraryScreen(
     onSetActive: (String) -> Unit,
     onTogglePin: (GameProfile) -> Unit,
     onDelete: (GameProfile) -> Unit,
+    onLaunchGame: (String) -> GameLaunchResult,
 ) {
     var editing by remember { mutableStateOf<GameProfileDraft?>(null) }
     var deleting by remember { mutableStateOf<GameProfile?>(null) }
+    var launchMessage by remember { mutableStateOf<String?>(null) }
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
@@ -134,6 +140,14 @@ private fun GameLibraryScreen(
                     },
                     onPin = { onTogglePin(game) },
                     onDelete = { deleting = game },
+                    onLaunch = game.packageNames.firstOrNull()?.let { packageName ->
+                        {
+                            launchMessage = when (val result = onLaunchGame(packageName)) {
+                                GameLaunchResult.Success -> "Game launch requested on the primary display."
+                                is GameLaunchResult.Failure -> result.reason
+                            }
+                        }
+                    },
                 )
             }
             item { Spacer(Modifier.height(80.dp)) }
@@ -158,6 +172,13 @@ private fun GameLibraryScreen(
             dismissButton = { TextButton(onClick = { deleting = null }) { Text("Cancel") } },
         )
     }
+    launchMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { launchMessage = null },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { launchMessage = null }) { Text("OK") } },
+        )
+    }
 }
 
 @Composable
@@ -168,6 +189,7 @@ private fun GameCard(
     onEdit: () -> Unit,
     onPin: () -> Unit,
     onDelete: () -> Unit,
+    onLaunch: (() -> Unit)?,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onSetActive),
@@ -191,6 +213,7 @@ private fun GameCard(
                 if (active) Text("ACTIVE GAME", style = MaterialTheme.typography.labelMedium)
             }
             IconButton(onClick = onPin) { Icon(Icons.Rounded.PushPin, contentDescription = "Pin game") }
+            onLaunch?.let { IconButton(onClick = it) { Icon(Icons.Rounded.PlayArrow, contentDescription = "Launch ${game.title} on primary display") } }
             IconButton(onClick = onEdit) { Icon(Icons.Rounded.Edit, contentDescription = "Edit game") }
             IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = "Delete game") }
         }

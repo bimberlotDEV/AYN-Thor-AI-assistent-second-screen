@@ -4,7 +4,7 @@ GameSide AI supports a user-supplied DeepSeek API key. No shared key is bundled 
 
 ## Configure on the device
 
-1. Open **Settings** in GameSide AI.
+1. Open **More > AI** in GameSide AI.
 2. Paste a DeepSeek API key into **DeepSeek API key**.
 3. Tap **Encrypt & save**.
 4. Tap **Test DeepSeek connection**.

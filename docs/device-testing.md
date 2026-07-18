@@ -30,7 +30,7 @@ Use the Huawei for:
 - the single-screen companion flow;
 - rotation and process recreation;
 - touch interaction and small-screen layout;
-- later offline, storage, provider, wiki, and performance tests.
+- offline storage, provider, Wiki, privacy, backup, and performance tests.
 
 For a partial multi-display check, enable **Developer options → Simulate secondary displays** and choose an overlay resolution. Confirm that GameSide lists the overlay as a non-primary display and attempts to launch the companion there. An overlay does not validate physical secondary-screen touch routing.
 
@@ -39,8 +39,8 @@ For a partial multi-display check, enable **Developer options → Simulate secon
 1. Start GameSide AI on the primary display.
 2. Confirm diagnostics show both physical displays with plausible dimensions and density.
 3. Select the lower display and launch the companion.
-4. On the lower display, press the touch counter repeatedly and rotate/recreate the activity.
-5. Enter a known installed game's package name and launch it.
+4. On the lower display, navigate through Ask, Wiki, Saved, Games, and More; enter text, scroll, and rotate/recreate the activity.
+5. Add the exact package name of a known installed game to its profile, then use the launch action in Games.
 6. Confirm the game appears on the primary display while the companion remains visible and touchable below.
 7. Switch focus between both displays and confirm neither task is unexpectedly moved.
 8. Disable/re-enable the lower display and confirm GameSide either restores there or offers the single-screen fallback without losing durable state.

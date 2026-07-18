@@ -6,6 +6,12 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+val releaseKeystorePath = providers.gradleProperty("GAMESIDE_KEYSTORE_PATH").orElse(providers.environmentVariable("GAMESIDE_KEYSTORE_PATH")).orNull
+val releaseKeystorePassword = providers.gradleProperty("GAMESIDE_KEYSTORE_PASSWORD").orElse(providers.environmentVariable("GAMESIDE_KEYSTORE_PASSWORD")).orNull
+val releaseKeyAlias = providers.gradleProperty("GAMESIDE_KEY_ALIAS").orElse(providers.environmentVariable("GAMESIDE_KEY_ALIAS")).orNull
+val releaseKeyPassword = providers.gradleProperty("GAMESIDE_KEY_PASSWORD").orElse(providers.environmentVariable("GAMESIDE_KEY_PASSWORD")).orNull
+val hasPrivateReleaseSigning = listOf(releaseKeystorePath, releaseKeystorePassword, releaseKeyAlias, releaseKeyPassword).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.gameside.ai"
     compileSdk = 36
@@ -15,8 +21,17 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0-poc"
+        versionName = "1.0.0-mvp"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasPrivateReleaseSigning) create("privateRelease") {
+            storeFile = file(requireNotNull(releaseKeystorePath))
+            storePassword = releaseKeystorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+        }
     }
 
     buildTypes {
@@ -24,6 +39,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (hasPrivateReleaseSigning) signingConfig = signingConfigs.getByName("privateRelease")
         }
     }
 

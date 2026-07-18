@@ -8,7 +8,7 @@ Test environment:
 - Android: 9 / API 28
 - EMUI build: 9.1.0.317
 - Built-in display: 1080 × 2312, 480 dpi, 60 Hz, internal touch
-- APK: debug `0.1.0-poc`, application ID `com.gameside.ai`
+- Initial display-test APK: debug `0.1.0-poc`; latest installed candidate: debug `1.0.0-mvp`; application ID `com.gameside.ai`
 
 Validated behavior:
 
@@ -103,6 +103,17 @@ Conversation and cost-control validation:
 - The Ask screen reports the 2,000-character question boundary, fourteen-message context window, active spoiler mode, and configured maximum output tokens.
 - AI settings expose 512, 900, and 1500 token presets with a clear cost warning. Exact price claims are intentionally avoided.
 - Chat DAO coverage now verifies session listing order, rename, individual delete, message/citation persistence, and game cascade. Seven Huawei tests, JVM tests, lint, assembly, install, and cold launch pass without runtime or SQLite errors.
+
+Release-candidate and full companion validation:
+
+- The versioned `1.0.0-mvp` debug APK installed as an in-place upgrade on the Huawei without losing the game, conversation, saved answer, Wiki cache, settings, or encrypted key.
+- The single-screen fallback started `CompanionActivity` in its own task and rendered the complete Ask/Wiki/Saved/Games/More UI with the existing Elden Ring conversation and all answer actions.
+- The obsolete touch-proof-only companion screen was removed. The same full interface is now launched through `ActivityOptions.launchDisplayId` for eligible secondary displays.
+- A mapped Android package now exposes an explicit launch action in Games; `GameLauncher` targets display 0 and returns actionable invalid/missing/blocked errors.
+- The clean JVM suite, debug lint, seven Huawei tests, and minified R8 release build with `lintVitalRelease` passed. A 1.63 MB test-key-signed release verified with APK Signature Scheme v2, installed as an upgrade, and reported version `1.0.0-mvp`; long-lived private signing is configured through external environment/Gradle values and documented separately.
+- No `AndroidRuntime`, Room, or SQLite error was recorded during install, cold launch, task creation, or rendering the complete companion activity.
+- A final simulated-display run detected a fresh non-hardcoded overlay display ID, kept `MainActivity` on display 0, and launched the complete `CompanionActivity` task on display 4 without a crash. The original `overlay_display_devices=null` setting was restored after both final runs.
+- Final APK inspection found only internet, network-state, and Android's non-exported dynamic-receiver compatibility permission. `CompanionActivity`, Room's service, and AndroidX startup components are non-exported; only the required launcher activity is exported.
 
 Not yet validated:
 

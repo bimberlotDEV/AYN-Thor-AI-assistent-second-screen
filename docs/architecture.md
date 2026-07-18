@@ -59,8 +59,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 1. `AndroidDisplayRepository` observes `DisplayManager` and emits immutable capability snapshots.
 2. `DisplaySelectionPolicy` considers only non-primary displays that Android reports can host activities. A saved signature will take precedence in a later persistence phase; otherwise the smallest eligible display is recommended.
 3. The primary dashboard shows every display and its relevant diagnostics.
-4. `SecondaryDisplayLauncher` starts `CompanionActivity` in a separate task using `ActivityOptions.launchDisplayId`.
-5. If no secondary display is available, the same companion activity opens on the current display.
+4. `SecondaryDisplayLauncher` starts `CompanionActivity` in a separate task using `ActivityOptions.launchDisplayId`; that activity hosts the complete Ask/Wiki/Saved/Games/More product UI and the same local state as the launcher activity.
+5. If no secondary display is available, the complete companion activity opens on the current display.
 6. A user-triggered mapped game launch explicitly targets `Display.DEFAULT_DISPLAY`.
 
 Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed resolution affects behavior.
@@ -68,14 +68,14 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 ## Security decisions
 
 - No app component is exported except the launcher activity.
-- Cloud backup is disabled; future personal export will be explicit.
+- Cloud backup is disabled; personal export happens only through the explicit Android document picker.
 - No sensitive Android permission is requested.
 - Game discovery is limited to launcher activities and explicit package names; `QUERY_ALL_PACKAGES` is not used.
 - Cleartext networking is disabled. DeepSeek and game-wiki traffic uses HTTPS.
 - No provider credentials, screenshots, notes, or analytics are collected. The submitted question and compact recent context leave the device only for the requested answer.
-- Android backup remains disabled, so local profiles, settings, and future encrypted values are not copied to cloud backup.
+- Android backup remains disabled, so local profiles, settings, and encrypted values are not copied to cloud backup.
 - Every destructive privacy action requires explicit confirmation; category deletion preserves unrelated data.
 
 ## Next architecture increment
 
-Complete release signing/distribution documentation, source diagnostics, UI polish, and the final MVP audit.
+Run the physical AYN Thor acceptance checklist, then consider post-MVP voice and user-triggered screenshot input.

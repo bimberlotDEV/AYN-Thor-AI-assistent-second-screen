@@ -147,7 +147,7 @@ class MediaWikiGameKnowledgeProvider @Inject constructor() : GameKnowledgeProvid
             connection.connectTimeout = TIMEOUT_MILLIS
             connection.readTimeout = TIMEOUT_MILLIS
             connection.setRequestProperty("Accept", "application/json")
-            connection.setRequestProperty("User-Agent", "GameSideAI/0.1 (private Android gaming companion)")
+            connection.setRequestProperty("User-Agent", "GameSideAI/1.0 (private Android gaming companion)")
             val code = connection.responseCode
             if (code !in 200..299) throw IOException("Game wiki returned HTTP $code")
             val contentLength = connection.contentLengthLong
