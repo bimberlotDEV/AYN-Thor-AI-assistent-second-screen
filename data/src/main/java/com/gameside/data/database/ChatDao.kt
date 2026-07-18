@@ -9,6 +9,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class ChatDao {
+    @Query("SELECT * FROM chat_sessions WHERE gameProfileId = :gameId ORDER BY updatedAtEpochMillis DESC")
+    abstract fun observeSessions(gameId: String): Flow<List<ChatSessionEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM chat_sessions WHERE id = :sessionId LIMIT 1")
+    abstract fun observeThread(sessionId: String): Flow<ChatThreadEntity?>
+
     @Transaction
     @Query("SELECT * FROM chat_sessions WHERE gameProfileId = :gameId ORDER BY updatedAtEpochMillis DESC LIMIT 1")
     abstract fun observeLatestThread(gameId: String): Flow<ChatThreadEntity?>
@@ -18,6 +25,12 @@ abstract class ChatDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     abstract suspend fun insertSession(session: ChatSessionEntity)
+
+    @Query("UPDATE chat_sessions SET title = :title, updatedAtEpochMillis = :updatedAt WHERE id = :sessionId")
+    abstract suspend fun renameSession(sessionId: String, title: String, updatedAt: Long)
+
+    @Query("DELETE FROM chat_sessions WHERE id = :sessionId")
+    abstract suspend fun deleteSession(sessionId: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     protected abstract suspend fun insertMessageEntity(message: ChatMessageEntity)

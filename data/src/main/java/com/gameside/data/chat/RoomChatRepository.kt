@@ -23,13 +23,28 @@ class RoomChatRepository @Inject constructor(private val dao: ChatDao) : ChatRep
     override fun observeLatestThread(gameProfileId: String): Flow<ChatThread?> =
         dao.observeLatestThread(gameProfileId).map { it?.toDomain() }
 
+    override fun observeSessions(gameProfileId: String): Flow<List<ChatSession>> =
+        dao.observeSessions(gameProfileId).map { values -> values.map { it.toDomain() } }
+
+    override fun observeThread(sessionId: String): Flow<ChatThread?> =
+        dao.observeThread(sessionId).map { it?.toDomain() }
+
     override suspend fun getOrCreateSession(game: GameProfile): ChatSession {
         dao.latestSession(game.id)?.let { return it.toDomain() }
+        return createSession(game)
+    }
+
+    override suspend fun createSession(game: GameProfile): ChatSession {
         val now = Instant.now()
-        val session = ChatSessionEntity(UUID.randomUUID().toString(), game.id, game.title, now.toEpochMilli(), now.toEpochMilli())
+        val session = ChatSessionEntity(UUID.randomUUID().toString(), game.id, "New conversation", now.toEpochMilli(), now.toEpochMilli())
         dao.insertSession(session)
         return session.toDomain()
     }
+
+    override suspend fun renameSession(sessionId: String, title: String) =
+        dao.renameSession(sessionId, title.trim().take(80), Instant.now().toEpochMilli())
+
+    override suspend fun deleteSession(sessionId: String) = dao.deleteSession(sessionId)
 
     override suspend fun addMessage(message: ChatMessage) {
         dao.insertMessage(message.toEntity())

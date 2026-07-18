@@ -38,6 +38,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 5. The provider streams SSE text deltas from DeepSeek V4 and supports coroutine cancellation.
 6. Completed user and assistant messages are persisted in Room. Partial output is deliberately not saved after cancellation.
 7. Provider errors are mapped to actionable messages without exposing response bodies, credentials, prompts, or stack traces.
+8. Chat sessions are listed per game and can be selected, renamed, or individually deleted. Starting a new conversation remains transient until the first question, avoiding empty database records.
+9. Context is hard-limited to fourteen recent messages. The user chooses a 512, 900, or 1500 maximum-output-token preset; no guessed currency estimate is shown because billing belongs to the provider account.
 
 ## Knowledge retrieval flow
 
@@ -76,4 +78,4 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 
 ## Next architecture increment
 
-Add source diagnostics, richer conversation management, and cost/context controls.
+Complete release signing/distribution documentation, source diagnostics, UI polish, and the final MVP audit.

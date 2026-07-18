@@ -95,6 +95,15 @@ Backup and restore validation:
 - Import is bounded to 10 MB and 20,000 records per collection, accepts only user-selected `content://` documents, validates supported enums and HTTPS sources, and rejects broken references before writing.
 - The temporary backup created in the phone's Downloads folder was removed after validation; the user's in-app data and encrypted key remain intact.
 
+Conversation and cost-control validation:
+
+- The Huawei Ask screen renders copy, retry, convert-to-checklist, and bookmark actions without crowding the answer card at 1080 x 2312 / 480 dpi.
+- Conversation history listed the existing Elden Ring session, exposed accessible rename/delete controls, and opened the rename dialog; the dialog was cancelled so live data remained unchanged.
+- Starting a new conversation displayed a clean empty state and did not persist an unused session or make a DeepSeek request.
+- The Ask screen reports the 2,000-character question boundary, fourteen-message context window, active spoiler mode, and configured maximum output tokens.
+- AI settings expose 512, 900, and 1500 token presets with a clear cost warning. Exact price claims are intentionally avoided.
+- Chat DAO coverage now verifies session listing order, rename, individual delete, message/citation persistence, and game cascade. Seven Huawei tests, JVM tests, lint, assembly, install, and cold launch pass without runtime or SQLite errors.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

@@ -87,6 +87,13 @@ class GameSideDatabaseTest {
         assertEquals(listOf("Question", "Answer"), thread?.messages?.sortedBy { it.message.createdAtEpochMillis }?.map { it.message.content })
         assertEquals("Guide", thread?.messages?.last()?.citations?.single()?.title)
 
+        chatDao.insertSession(ChatSessionEntity("second-session", profile.id, "Second run", 5L, 5L))
+        assertEquals(listOf("Second run", "Chat Game"), chatDao.observeSessions(profile.id).first().map { it.title })
+        chatDao.renameSession("second-session", "Boss route", 6L)
+        assertEquals("Boss route", chatDao.observeThread("second-session").first()?.session?.title)
+        chatDao.deleteSession("second-session")
+        assertEquals(listOf("session"), chatDao.observeSessions(profile.id).first().map { it.id })
+
         dao.delete(profile.id)
         assertEquals(null, chatDao.observeLatestThread(profile.id).first())
     }

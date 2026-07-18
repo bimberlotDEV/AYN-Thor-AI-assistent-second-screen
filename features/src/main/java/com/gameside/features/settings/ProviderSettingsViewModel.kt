@@ -21,6 +21,7 @@ data class ProviderSettingsState(
     val keyDraft: String = "",
     val hasStoredKey: Boolean = false,
     val model: String = "deepseek-v4-flash",
+    val maxAnswerTokens: Int = 900,
     val isWorking: Boolean = false,
     val statusMessage: String? = null,
 )
@@ -47,6 +48,7 @@ class ProviderSettingsViewModel @Inject constructor(
             keyDraft = inputs.keyDraft,
             hasStoredKey = inputs.hasKey,
             model = settings.aiModel,
+            maxAnswerTokens = settings.maxAnswerTokens,
             isWorking = inputs.working,
             statusMessage = inputs.message,
         )
@@ -88,6 +90,10 @@ class ProviderSettingsViewModel @Inject constructor(
 
     fun setModel(model: String) {
         viewModelScope.launch { settingsRepository.setAiModel(model) }
+    }
+
+    fun setMaxAnswerTokens(tokens: Int) {
+        viewModelScope.launch { settingsRepository.setMaxAnswerTokens(tokens) }
     }
 
     fun testConnection() {

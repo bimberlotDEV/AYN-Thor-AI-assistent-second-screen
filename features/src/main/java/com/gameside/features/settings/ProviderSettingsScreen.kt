@@ -69,6 +69,20 @@ fun ProviderSettingsRoute(modifier: Modifier = Modifier, viewModel: ProviderSett
                 label = { Text("V4 Pro · stronger") },
             )
         }
+        Text("Answer length & cost", style = MaterialTheme.typography.titleMedium)
+        Text("A lower output limit usually responds faster and uses less paid API credit. The exact charge is determined by your DeepSeek account.")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(512, 900, 1500).forEach { tokens ->
+                FilterChip(
+                    modifier = Modifier.weight(1f),
+                    selected = state.maxAnswerTokens == tokens,
+                    onClick = { viewModel.setMaxAnswerTokens(tokens) },
+                    label = { Text(tokens.toString()) },
+                )
+            }
+        }
+        Text("512 short · 900 balanced · 1500 detailed", style = MaterialTheme.typography.labelMedium)
+        Text("Only the 14 most recent messages are sent as conversation context. Retrieved Wiki evidence is separately size-limited by spoiler mode.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = viewModel::testConnection, enabled = state.hasStoredKey && !state.isWorking) {
             if (state.isWorking) CircularProgressIndicator(Modifier.height(18.dp), strokeWidth = 2.dp)
             else Text("Test DeepSeek connection")

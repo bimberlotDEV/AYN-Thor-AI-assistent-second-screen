@@ -24,6 +24,8 @@ The repository now contains the validated display proof of concept plus the firs
 - a dedicated per-game Wiki browser with search, clickable sources, a seven-day local document cache, offline status, cache clearing, and spoiler-aware previews.
 - a local-data privacy dashboard with category counts, confirmed selective deletion, encrypted-key removal, and a full on-device reset.
 - validated JSON export/import through Android's document picker for games, conversations, citations, saved answers, notes, and checklists.
+- per-game conversation management with new/open/rename/delete flows plus answer copy, retry, bookmark, and checklist actions;
+- explicit 14-message context trimming and selectable 512/900/1500 output-token limits for cost control.
 
 The sourced AI-chat slice supports MediaWiki-powered game sites such as wiki.gg and Fandom. A profile can override automatic discovery with its own HTTPS game-wiki URL. If no sufficiently relevant evidence is found, the app deliberately falls back to clearly unsourced general model knowledge. Assistant answers can be saved with their question and citations; notes, checklists, and previously downloaded wiki pages remain usable without a network connection. Strict spoiler modes hide cached article previews until the source is intentionally opened.
 
