@@ -1,0 +1,35 @@
+# Device test results
+
+## Huawei P30 Lite — 2026-07-18
+
+Test environment:
+
+- Model: HUAWEI MAR-LX1A (P30 Lite)
+- Android: 9 / API 28
+- EMUI build: 9.1.0.317
+- Built-in display: 1080 × 2312, 480 dpi, 60 Hz, internal touch
+- APK: debug `0.1.0-poc`, application ID `com.gameside.ai`
+
+Validated behavior:
+
+- ADB installation and cold launch completed successfully.
+- GameSide detected the built-in display as display 0, primary, touch-capable, and activity-capable.
+- The single-screen fallback opened `CompanionActivity` in its separate companion task.
+- The companion layout rendered correctly at 1080 × 2312 and remained vertically scrollable.
+- The touch proof incremented from 0 to 1 and reported the correct display.
+- No `AndroidRuntime` crash was recorded during install, launch, fallback, touch, task switching, overlay creation, or overlay removal.
+- Android's simulated secondary display was detected at 1240 × 1080 and 320 dpi as a non-touch presentation display.
+- The simulated display was recommended by the selection policy and exposed as activity-capable.
+- `MainActivity` remained on display 0 while `CompanionActivity` ran in its own stack and window on the simulated display.
+- Removing the simulated display returned the system to one display without a crash; the primary dashboard resumed on display 0.
+- The simulated display received different IDs across sessions, confirming that display IDs must be treated as ephemeral.
+- The original `overlay_display_devices` setting was restored to `null` and temporary on-device test artifacts were removed.
+
+Not yet validated:
+
+- Physical secondary-display touch; the Android overlay correctly reports no touch.
+- Concurrent game on the primary physical screen and companion touch on the lower AYN Thor screen.
+- Real AYN display disable/re-enable, lid, focus, and firmware behavior.
+- Launching a mapped game through the text field. Automated entry was intercepted by the Huawei's first-run SwiftKey setup, so this remains a manual test rather than changing the owner's keyboard configuration.
+
+The Huawei results validate the standards-based display/activity implementation but do not replace the AYN Thor acceptance gate.

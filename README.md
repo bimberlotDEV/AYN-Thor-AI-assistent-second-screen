@@ -48,3 +48,5 @@ The proof of concept requests no sensitive permissions, performs no analytics, r
 See [device testing](docs/device-testing.md) for the Huawei P30 Lite, simulated displays, and AYN Thor acceptance procedure.
 
 The module boundaries and display data flow are documented in [architecture](docs/architecture.md).
+
+Recorded hardware and simulated-display results are available in [device test results](docs/test-results.md).
