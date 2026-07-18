@@ -22,6 +22,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 3. Foreign keys cascade related rows when a profile is deleted.
 4. Game-library state combines repository flows with the saved active profile and exposes immutable UI state.
 5. Provider credentials use AES/GCM values encrypted by a non-exportable Android Keystore key. Plaintext keys are not placed in Room or DataStore.
+6. Saved answers, notes, checklists, and checklist items are stored under the active game in Room schema 4 and cascade when that game is deleted.
+7. Saved-answer citations are encoded as structured JSON inside the saved record so the bookmark remains independent if chat history is cleared.
 
 ## AI chat flow
 
@@ -67,4 +69,4 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 
 ## Next architecture increment
 
-Add the personal-tools slice: bookmarks, notes, and offline checklists, followed by cached wiki browsing and explicit source diagnostics.
+Add cached wiki browsing and explicit source diagnostics, followed by privacy/export controls and richer conversation management.

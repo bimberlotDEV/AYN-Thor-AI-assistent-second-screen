@@ -11,11 +11,16 @@ import androidx.room.RoomDatabase
         ChatSessionEntity::class,
         ChatMessageEntity::class,
         SourceCitationEntity::class,
+        SavedAnswerEntity::class,
+        GameNoteEntity::class,
+        GameChecklistEntity::class,
+        ChecklistItemEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class GameSideDatabase : RoomDatabase() {
     abstract fun gameProfileDao(): GameProfileDao
     abstract fun chatDao(): ChatDao
+    abstract fun personalToolsDao(): PersonalToolsDao
 }

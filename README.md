@@ -20,8 +20,9 @@ The repository now contains the validated display proof of concept plus the firs
 - DataStore app settings and Android Keystore-backed encrypted credential storage contracts.
 - per-game DeepSeek V4 chat with streaming output, cancellation, local history, model selection, and spoiler-aware prompts;
 - a provider-neutral knowledge contract plus automatic game-wiki detection, retrieval, ranking, and persisted clickable citations.
+- offline saved answers, personal notes, and checklists scoped to the active game.
 
-The first sourced AI-chat slice supports MediaWiki-powered game sites such as wiki.gg and Fandom. A profile can override automatic discovery with its own HTTPS game-wiki URL. If no sufficiently relevant evidence is found, the app deliberately falls back to clearly unsourced general model knowledge.
+The sourced AI-chat slice supports MediaWiki-powered game sites such as wiki.gg and Fandom. A profile can override automatic discovery with its own HTTPS game-wiki URL. If no sufficiently relevant evidence is found, the app deliberately falls back to clearly unsourced general model knowledge. Assistant answers can be saved with their question and citations; notes and checklists remain usable without a network connection.
 
 ## Build
 

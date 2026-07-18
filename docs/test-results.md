@@ -61,6 +61,13 @@ Game-wiki provider validation:
 - The rendered-page fallback was required and validated because the selected wiki.gg instance does not expose MediaWiki's optional TextExtracts module.
 - Wikipedia is no longer used as the default or fallback knowledge provider.
 
+Personal tools validation:
+
+- Database schema 3 migrated to schema 4 on the existing Huawei installation without losing games, chat history, citations, or the encrypted provider credential.
+- Four Huawei instrumentation tests now pass; the new test verifies offline saved-answer, note, checklist, item-toggle, and game-cascade behavior.
+- A real Moonveil answer was bookmarked from chat and appeared under the new `Saved` navigation destination with its original question, answer, and stored source count.
+- The Saved screen, note/checklist creation dialogs, delete actions, and offline checklist toggles render without AndroidRuntime or Room errors.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

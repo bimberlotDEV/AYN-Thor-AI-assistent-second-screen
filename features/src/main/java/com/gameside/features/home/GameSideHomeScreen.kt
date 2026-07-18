@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Chat
 import androidx.compose.material.icons.rounded.DeveloperBoard
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ import com.gameside.features.display.DisplayDashboardRoute
 import com.gameside.features.chat.ChatRoute
 import com.gameside.features.game.GameLibraryRoute
 import com.gameside.features.onboarding.OnboardingScreen
+import com.gameside.features.personal.PersonalToolsRoute
 import com.gameside.features.settings.ProviderSettingsRoute
 
 @Composable
@@ -77,12 +79,18 @@ private fun HomeContent(
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Rounded.DeveloperBoard, contentDescription = null) },
-                    label = { Text("Displays") },
+                    icon = { Icon(Icons.Rounded.Bookmarks, contentDescription = null) },
+                    label = { Text("Saved") },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
+                    icon = { Icon(Icons.Rounded.DeveloperBoard, contentDescription = null) },
+                    label = { Text("Displays") },
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 4,
+                    onClick = { selectedTab = 4 },
                     icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
                     label = { Text("Settings") },
                 )
@@ -92,7 +100,8 @@ private fun HomeContent(
         when (selectedTab) {
             0 -> ChatRoute(Modifier.padding(padding))
             1 -> GameLibraryRoute(Modifier.padding(padding))
-            2 -> DisplayDashboardRoute(
+            2 -> PersonalToolsRoute(Modifier.padding(padding))
+            3 -> DisplayDashboardRoute(
                 onLaunchCompanion = onLaunchCompanion,
                 onOpenSingleScreen = onOpenSingleScreen,
                 modifier = Modifier.padding(padding),

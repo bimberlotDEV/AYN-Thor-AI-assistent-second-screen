@@ -90,4 +90,32 @@ class GameSideDatabaseTest {
         dao.delete(profile.id)
         assertEquals(null, chatDao.observeLatestThread(profile.id).first())
     }
+
+    @Test
+    fun personalToolsPersistOfflineAndCascadeWithGame() = runBlocking {
+        val profile = GameProfileEntity(
+            id = "tools-game", title = "Tools Game", platform = "OTHER", coverImageUri = null,
+            spoilerLevel = "MINIMAL", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
+        val tools = database.personalToolsDao()
+        tools.upsertSavedAnswer(SavedAnswerEntity("saved", profile.id, "message", "Question", "Answer", "[]", 2L))
+        tools.upsertNote(GameNoteEntity("note", profile.id, "Route", "Go north", 2L, 2L))
+        tools.upsertChecklist(
+            GameChecklistEntity("list", profile.id, "Items", 2L, 2L),
+            listOf(ChecklistItemEntity("item", "list", "Find key", false, 0)),
+        )
+
+        assertEquals("Answer", tools.observeSavedAnswers(profile.id).first().single().answer)
+        assertEquals("Go north", tools.observeNotes(profile.id).first().single().content)
+        tools.setItemChecked("item", true)
+        assertEquals(true, tools.observeChecklists(profile.id).first().single().items.single().isChecked)
+
+        dao.delete(profile.id)
+        assertEquals(emptyList<SavedAnswerEntity>(), tools.observeSavedAnswers(profile.id).first())
+        assertEquals(emptyList<GameNoteEntity>(), tools.observeNotes(profile.id).first())
+        assertEquals(emptyList<ChecklistWithItems>(), tools.observeChecklists(profile.id).first())
+    }
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material3.Button
@@ -53,6 +54,7 @@ fun ChatRoute(modifier: Modifier = Modifier, viewModel: ChatViewModel = viewMode
         onSend = viewModel::send,
         onStop = viewModel::stop,
         onClear = viewModel::clearHistory,
+        onSaveAnswer = viewModel::saveAnswer,
         onDismissError = viewModel::dismissError,
         modifier = modifier,
     )
@@ -66,6 +68,7 @@ private fun ChatScreen(
     onSend: () -> Unit,
     onStop: () -> Unit,
     onClear: () -> Unit,
+    onSaveAnswer: (ChatMessage) -> Unit,
     onDismissError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -128,7 +131,7 @@ private fun ChatScreen(
                             }
                         }
                     }
-                    items(messages, key = ChatMessage::id) { MessageCard(it) }
+                    items(messages, key = ChatMessage::id) { MessageCard(it, onSaveAnswer) }
                     if (state.isSearchingSources) {
                         item("sources-loading") {
                             Row(
@@ -142,7 +145,7 @@ private fun ChatScreen(
                         }
                     }
                     if (state.streamingAnswer.isNotEmpty()) {
-                        item("streaming") { AssistantCard(state.streamingAnswer, state.streamingCitations, isStreaming = true) }
+                        item("streaming") { AssistantCard(state.streamingAnswer, state.streamingCitations, isStreaming = true, onSave = null) }
                     }
                 }
                 Row(
@@ -173,8 +176,8 @@ private fun ChatScreen(
 }
 
 @Composable
-private fun MessageCard(message: ChatMessage) {
-    if (message.role == ChatRole.ASSISTANT) AssistantCard(message.content, message.citations, false)
+private fun MessageCard(message: ChatMessage, onSave: (ChatMessage) -> Unit) {
+    if (message.role == ChatRole.ASSISTANT) AssistantCard(message.content, message.citations, false, onSave = { onSave(message) })
     else Card(
         modifier = Modifier.fillMaxWidth().padding(start = 42.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -182,7 +185,12 @@ private fun MessageCard(message: ChatMessage) {
 }
 
 @Composable
-private fun AssistantCard(text: String, citations: List<com.gameside.domain.knowledge.SourceCitation>, isStreaming: Boolean) {
+private fun AssistantCard(
+    text: String,
+    citations: List<com.gameside.domain.knowledge.SourceCitation>,
+    isStreaming: Boolean,
+    onSave: (() -> Unit)?,
+) {
     val uriHandler = LocalUriHandler.current
     Card(
         modifier = Modifier.fillMaxWidth().padding(end = 20.dp),
@@ -194,6 +202,10 @@ private fun AssistantCard(text: String, citations: List<com.gameside.domain.know
                 if (isStreaming) {
                     Spacer(Modifier.weight(1f))
                     CircularProgressIndicator(Modifier.height(18.dp), strokeWidth = 2.dp)
+                }
+                if (onSave != null) {
+                    Spacer(Modifier.weight(1f))
+                    IconButton(onClick = onSave) { Icon(Icons.Rounded.BookmarkAdd, contentDescription = "Save answer") }
                 }
             }
             Spacer(Modifier.height(6.dp))

@@ -15,6 +15,8 @@ import com.gameside.domain.game.GameProfile
 import com.gameside.domain.game.GameProfileRepository
 import com.gameside.domain.knowledge.KnowledgeRetriever
 import com.gameside.domain.knowledge.SourceCitation
+import com.gameside.domain.personal.PersonalToolsRepository
+import com.gameside.domain.personal.SavedAnswer
 import com.gameside.domain.settings.AppSettings
 import com.gameside.domain.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,6 +73,7 @@ class ChatViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val provider: TextAiProvider,
     private val knowledgeRetriever: KnowledgeRetriever,
+    private val personalTools: PersonalToolsRepository,
 ) : ViewModel() {
     private val draft = MutableStateFlow("")
     private val streaming = MutableStateFlow("")
@@ -185,6 +188,23 @@ class ChatViewModel @Inject constructor(
         val gameId = state.value.game?.id ?: return
         stop()
         viewModelScope.launch { chats.clearGameHistory(gameId) }
+    }
+
+    fun saveAnswer(message: ChatMessage) {
+        if (message.role != ChatRole.ASSISTANT) return
+        val snapshot = state.value
+        val gameId = snapshot.game?.id ?: return
+        val messages = snapshot.thread?.messages.orEmpty()
+        val index = messages.indexOfFirst { it.id == message.id }
+        val question = messages.take(index.coerceAtLeast(0)).lastOrNull { it.role == ChatRole.USER }?.content ?: "Saved answer"
+        viewModelScope.launch {
+            personalTools.saveAnswer(
+                SavedAnswer(
+                    id = UUID.randomUUID().toString(), gameProfileId = gameId, sourceMessageId = message.id,
+                    question = question, answer = message.content, citations = message.citations, createdAt = Instant.now(),
+                ),
+            )
+        }
     }
 
     private companion object {
