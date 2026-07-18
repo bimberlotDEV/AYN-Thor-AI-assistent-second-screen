@@ -174,4 +174,28 @@ class GameSideDatabaseTest {
         assertEquals(0, privacy.checklistCount().first())
         assertEquals(0, privacy.wikiPageCount().first())
     }
+
+    @Test
+    fun backupMergeUpdatesProfileWithoutCascadingExistingData() = runBlocking {
+        val original = GameProfileEntity(
+            id = "backup-game", title = "Old title", platform = "OTHER", coverImageUri = null,
+            spoilerLevel = "NONE", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(original, emptyList(), emptyList()))
+        database.chatDao().insertSession(ChatSessionEntity("existing-session", original.id, original.title, 2L, 2L))
+        val imported = original.copy(title = "Imported title", updatedAtEpochMillis = 3L)
+
+        database.backupDao().importData(
+            BackupData(
+                games = listOf(imported), packages = emptyList(), wikiSources = emptyList(), sessions = emptyList(),
+                messages = emptyList(), citations = emptyList(), savedAnswers = emptyList(), notes = emptyList(),
+                checklists = emptyList(), checklistItems = emptyList(),
+            ),
+        )
+
+        assertEquals("Imported title", dao.observeById(original.id).first()?.profile?.title)
+        assertEquals("existing-session", database.chatDao().observeLatestThread(original.id).first()?.session?.id)
+    }
 }

@@ -86,6 +86,15 @@ Privacy controls validation:
 - Full JVM tests, debug lint, debug APK assembly, install-over-existing-data, navigation, and dialog cancellation passed without `AndroidRuntime` or SQLite errors.
 - The complete reset implementation clears all Room tables, encrypted credential preferences, the app's Android Keystore key, and DataStore preferences; it is intentionally not executed against the user's live test data.
 
+Backup and restore validation:
+
+- Android's system document picker exported a version-1 JSON backup from the live Huawei data containing one game, one conversation with citations, and one saved answer.
+- Inspection confirmed `containsCredentials: false`, no API-key pattern, and no downloaded Wiki-cache collection in the file.
+- Importing the same document reported one game, one conversation, and one personal item; the merge completed without duplicate, foreign-key, SQLite, or runtime errors.
+- Seven Huawei instrumentation tests pass. The new backup test proves an imported profile update preserves an existing conversation instead of triggering a parent-row cascade.
+- Import is bounded to 10 MB and 20,000 records per collection, accepts only user-selected `content://` documents, validates supported enums and HTTPS sources, and rejects broken references before writing.
+- The temporary backup created in the phone's Downloads folder was removed after validation; the user's in-app data and encrypted key remain intact.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

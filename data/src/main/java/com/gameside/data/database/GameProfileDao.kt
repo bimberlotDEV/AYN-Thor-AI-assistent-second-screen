@@ -3,6 +3,7 @@ package com.gameside.data.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.Upsert
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +24,7 @@ abstract class GameProfileDao {
     @Query("SELECT * FROM game_profiles WHERE id = :id")
     abstract fun observeById(id: String): Flow<GameProfileWithRelations?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     protected abstract suspend fun insertProfile(profile: GameProfileEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

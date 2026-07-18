@@ -21,6 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,6 +34,12 @@ private data class ConfirmAction(val title: String, val detail: String, val acti
 @Composable
 fun PrivacyRoute(modifier: Modifier = Modifier, viewModel: PrivacyViewModel = viewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { viewModel.exportTo(it.toString()) }
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.importFrom(it.toString()) }
+    }
     PrivacyScreen(
         state = state,
         clearConversations = viewModel::clearConversations,
@@ -39,6 +47,8 @@ fun PrivacyRoute(modifier: Modifier = Modifier, viewModel: PrivacyViewModel = vi
         clearWikiCache = viewModel::clearWikiCache,
         removeCredential = viewModel::removeCredential,
         resetAll = viewModel::resetAllData,
+        exportData = { exportLauncher.launch("gameside-ai-backup.json") },
+        importData = { importLauncher.launch(arrayOf("application/json", "text/plain")) },
         dismissMessage = viewModel::dismissMessage,
         modifier = modifier,
     )
@@ -52,6 +62,8 @@ private fun PrivacyScreen(
     clearWikiCache: () -> Unit,
     removeCredential: () -> Unit,
     resetAll: () -> Unit,
+    exportData: () -> Unit,
+    importData: () -> Unit,
     dismissMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,6 +84,14 @@ private fun PrivacyScreen(
         DataLine("Checklists", state.summary.checklists)
         DataLine("Downloaded wiki pages", state.summary.cachedWikiPages)
         DataLine("Encrypted DeepSeek key", if (state.summary.hasProviderCredential) "Stored" else "Not stored")
+        HorizontalDivider()
+        Text("Backup & transfer", style = MaterialTheme.typography.titleMedium)
+        Text("Export games, conversations, sources, saved answers, notes, and checklists. API keys and downloaded Wiki pages are never included.")
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedButton(onClick = exportData, enabled = !state.isWorking && state.summary.gameProfiles > 0) { Text("Export JSON") }
+            OutlinedButton(onClick = importData, enabled = !state.isWorking) { Text("Import JSON") }
+        }
+        Text("Import validates the file first, then merges records by ID without deleting other local data.", style = MaterialTheme.typography.bodySmall)
         HorizontalDivider()
         Text("Remove selected data", style = MaterialTheme.typography.titleMedium)
         PrivacyAction("Clear conversations", "Deletes all local chat sessions and their citations.", state.summary.conversations > 0, state.isWorking) {

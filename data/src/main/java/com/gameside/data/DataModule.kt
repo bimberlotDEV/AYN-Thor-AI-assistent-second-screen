@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.gameside.data.ai.DeepSeekTextAiProvider
+import com.gameside.data.backup.JsonBackupRepository
 import com.gameside.data.chat.RoomChatRepository
 import com.gameside.data.database.ChatDao
 import com.gameside.data.database.GameProfileDao
@@ -18,6 +19,7 @@ import com.gameside.data.privacy.RoomPrivacyRepository
 import com.gameside.data.security.KeystoreCredentialStore
 import com.gameside.data.settings.DataStoreSettingsRepository
 import com.gameside.domain.game.GameProfileRepository
+import com.gameside.domain.backup.BackupRepository
 import com.gameside.domain.knowledge.GameKnowledgeProvider
 import com.gameside.domain.knowledge.KnowledgeRetriever
 import com.gameside.domain.knowledge.KnowledgeCacheRepository
@@ -47,6 +49,7 @@ abstract class DataBindingsModule {
     @Binds @Singleton abstract fun bindKnowledgeCache(value: CachingGameKnowledgeProvider): KnowledgeCacheRepository
     @Binds @Singleton abstract fun bindPersonalToolsRepository(value: RoomPersonalToolsRepository): PersonalToolsRepository
     @Binds @Singleton abstract fun bindPrivacyRepository(value: RoomPrivacyRepository): PrivacyRepository
+    @Binds @Singleton abstract fun bindBackupRepository(value: JsonBackupRepository): BackupRepository
 }
 
 @Module
@@ -74,6 +77,9 @@ object DatabaseModule {
 
     @Provides
     fun providePrivacyDao(database: GameSideDatabase): com.gameside.data.database.PrivacyDao = database.privacyDao()
+
+    @Provides
+    fun provideBackupDao(database: GameSideDatabase): com.gameside.data.database.BackupDao = database.backupDao()
 
     @Provides
     @Singleton

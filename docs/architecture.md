@@ -26,6 +26,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 7. Saved-answer citations are encoded as structured JSON inside the saved record so the bookmark remains independent if chat history is cleared.
 8. Retrieved wiki documents are stored per game in Room schema 5. Cached documents expire for network retrieval after seven days, remain visible offline, and cascade when their game is deleted.
 9. `PrivacyRepository` combines Room counts with encrypted-credential presence and owns selective deletion. Full reset clears Room, encrypted preferences and their Android Keystore key, then DataStore so onboarding restarts.
+10. `BackupRepository` uses Android's user-selected document URIs. Versioned JSON contains profiles, relations, conversations, citations, and personal tools, but never credentials or cached article text. Import applies size, type, enum, URL, and foreign-key reference validation before one Room transaction merges records.
+11. Profile persistence uses Room `@Upsert`, avoiding SQLite `REPLACE` parent deletion and its unintended foreign-key cascades during edits or imports.
 
 ## AI chat flow
 
@@ -74,4 +76,4 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 
 ## Next architecture increment
 
-Add explicit JSON export/import without credentials, source diagnostics, and richer conversation management.
+Add source diagnostics, richer conversation management, and cost/context controls.
