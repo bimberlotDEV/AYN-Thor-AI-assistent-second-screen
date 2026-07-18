@@ -7,6 +7,7 @@ data class KnowledgeSearchResult(
     val id: String,
     val title: String,
     val sourceName: String,
+    val sourceApiUrl: String,
     val url: String,
     val snippet: String,
 )
@@ -36,4 +37,3 @@ interface GameKnowledgeProvider {
     suspend fun search(game: GameProfile, query: String): List<KnowledgeSearchResult>
     suspend fun retrieve(result: KnowledgeSearchResult): KnowledgeDocument
 }
-

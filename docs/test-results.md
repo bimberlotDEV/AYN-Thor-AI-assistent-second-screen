@@ -54,6 +54,13 @@ Knowledge/citation slice validation:
 - Unit tests cover evidence ranking and numbered prompt context. All JVM tests, debug lint, APK assembly, and three Huawei instrumentation tests passed.
 - No `AndroidRuntime` or Room errors were recorded after the schema migration, install, launch, source retrieval, generation, or citation rendering.
 
+Game-wiki provider validation:
+
+- Automatic Elden Ring source discovery selected a live MediaWiki-powered game wiki without a stored game list.
+- A live `How do I get Moonveil?` request retrieved the dedicated Moonveil article, generated an answer with inline `[1]` references, and displayed the persisted clickable `Moonveil` source.
+- The rendered-page fallback was required and validated because the selected wiki.gg instance does not expose MediaWiki's optional TextExtracts module.
+- Wikipedia is no longer used as the default or fallback knowledge provider.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

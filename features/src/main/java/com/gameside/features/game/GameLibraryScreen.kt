@@ -1,6 +1,8 @@
 package com.gameside.features.game
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -122,6 +125,7 @@ private fun GameLibraryScreen(
                             id = game.id,
                             title = game.title,
                             packageName = game.packageNames.firstOrNull().orEmpty(),
+                            preferredWikiSource = game.preferredWikiSources.firstOrNull().orEmpty(),
                             platform = game.platform,
                             spoilerLevel = game.spoilerLevel,
                             isPinned = game.isPinned,
@@ -180,6 +184,10 @@ private fun GameCard(
                     color = MaterialTheme.colorScheme.secondary,
                 )
                 game.packageNames.firstOrNull()?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                Text(
+                    game.preferredWikiSources.firstOrNull()?.let { "Game wiki: $it" } ?: "Game wiki: automatic",
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 if (active) Text("ACTIVE GAME", style = MaterialTheme.typography.labelMedium)
             }
             IconButton(onClick = onPin) { Icon(Icons.Rounded.PushPin, contentDescription = "Pin game") }
@@ -201,7 +209,10 @@ private fun GameEditorDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (initial.id == null) "Add game" else "Edit game") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.heightIn(max = 560.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 OutlinedTextField(
                     value = draft.title,
                     onValueChange = { draft = draft.copy(title = it) },
@@ -213,6 +224,14 @@ private fun GameEditorDialog(
                     value = draft.packageName,
                     onValueChange = { draft = draft.copy(packageName = it) },
                     label = { Text("Android package (optional)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = draft.preferredWikiSource,
+                    onValueChange = { draft = draft.copy(preferredWikiSource = it) },
+                    label = { Text("Game wiki URL (optional)") },
+                    supportingText = { Text("Leave empty for automatic wiki.gg/Fandom detection") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

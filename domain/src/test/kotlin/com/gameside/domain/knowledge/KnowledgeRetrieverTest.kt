@@ -29,8 +29,8 @@ class KnowledgeRetrieverTest {
 
     private class FakeProvider : GameKnowledgeProvider {
         private val results = listOf(
-            KnowledgeSearchResult("1", "Unrelated", "Test", "https://example.test/1", "Lore"),
-            KnowledgeSearchResult("2", "Moonveil", "Test", "https://example.test/2", "Katana"),
+            KnowledgeSearchResult("1", "Unrelated", "Test", "https://example.test/api.php", "https://example.test/1", "Lore"),
+            KnowledgeSearchResult("2", "Moonveil", "Test", "https://example.test/api.php", "https://example.test/2", "Katana"),
         )
         override suspend fun search(game: GameProfile, query: String) = results
         override suspend fun retrieve(result: KnowledgeSearchResult) = KnowledgeDocument(

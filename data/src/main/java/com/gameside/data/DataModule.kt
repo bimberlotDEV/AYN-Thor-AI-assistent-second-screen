@@ -10,7 +10,7 @@ import com.gameside.data.database.ChatDao
 import com.gameside.data.database.GameProfileDao
 import com.gameside.data.database.GameSideDatabase
 import com.gameside.data.game.RoomGameProfileRepository
-import com.gameside.data.knowledge.WikipediaKnowledgeProvider
+import com.gameside.data.knowledge.MediaWikiGameKnowledgeProvider
 import com.gameside.data.security.KeystoreCredentialStore
 import com.gameside.data.settings.DataStoreSettingsRepository
 import com.gameside.domain.game.GameProfileRepository
@@ -36,7 +36,7 @@ abstract class DataBindingsModule {
     @Binds @Singleton abstract fun bindCredentialStore(value: KeystoreCredentialStore): CredentialStore
     @Binds @Singleton abstract fun bindChatRepository(value: RoomChatRepository): ChatRepository
     @Binds @Singleton abstract fun bindTextAiProvider(value: DeepSeekTextAiProvider): TextAiProvider
-    @Binds @Singleton abstract fun bindKnowledgeProvider(value: WikipediaKnowledgeProvider): GameKnowledgeProvider
+    @Binds @Singleton abstract fun bindKnowledgeProvider(value: MediaWikiGameKnowledgeProvider): GameKnowledgeProvider
 }
 
 @Module
