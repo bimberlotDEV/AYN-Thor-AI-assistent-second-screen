@@ -2,6 +2,16 @@
 
 GameSide AI is a private, native Android gaming companion designed to remain usable on the lower screen of dual-screen handhelds while a game runs on the primary display.
 
+## Direct APK download
+
+For personal AYN Thor testing, download the current test-signed MVP directly from the repository:
+
+**[Download GameSide AI 1.0.0 MVP APK](https://raw.githubusercontent.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/main/downloads/GameSideAI-1.0.0-mvp-test.apk)**
+
+SHA-256: `FD4215F2AA6B98D8BF5B409E58BE7E76A78CC7985A59DA34E91A29B8D211EF6E`
+
+This build is suitable for personal device testing and matches the release variant validated on the Huawei P30 Lite. It uses the Android test certificate; use the documented private signing process before distributing production updates to other people.
+
 ## Current milestone
 
 The repository contains the installable `1.0.0-mvp` release candidate and its validated local-first feature set:
