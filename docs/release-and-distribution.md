@@ -1,8 +1,10 @@
 # Private release and distribution
 
-## Install the currently tested APK
+## Install the currently published test APK
 
-The debug APK is signed automatically by Android tooling and is the exact build used for Huawei validation:
+The direct-download APK in `downloads/` is the minified `1.0.0-mvp` release candidate used for the final Huawei validation. It is signed with the local Android test/debug certificate so it can be updated during private testing; it is not a long-term production-signed release.
+
+To install that published build without a PC, follow the Dutch [user guide](gebruikershandleiding.md). To build and install a development APK from source, use:
 
 ```powershell
 ./gradlew.bat clean assembleDebug
