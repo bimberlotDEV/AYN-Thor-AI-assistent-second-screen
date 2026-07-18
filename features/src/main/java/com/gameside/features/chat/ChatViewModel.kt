@@ -1,0 +1,148 @@
+package com.gameside.features.chat
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.gameside.domain.ai.AiAnswerRequest
+import com.gameside.domain.ai.AiChatMessage
+import com.gameside.domain.ai.AiGenerationEvent
+import com.gameside.domain.ai.GamePromptBuilder
+import com.gameside.domain.ai.TextAiProvider
+import com.gameside.domain.chat.ChatMessage
+import com.gameside.domain.chat.ChatRepository
+import com.gameside.domain.chat.ChatRole
+import com.gameside.domain.chat.ChatThread
+import com.gameside.domain.game.GameProfile
+import com.gameside.domain.game.GameProfileRepository
+import com.gameside.domain.settings.AppSettings
+import com.gameside.domain.settings.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import java.util.UUID
+import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+data class GameChatState(
+    val game: GameProfile? = null,
+    val thread: ChatThread? = null,
+    val draft: String = "",
+    val streamingAnswer: String = "",
+    val isGenerating: Boolean = false,
+    val errorMessage: String? = null,
+    val model: String = "deepseek-v4-flash",
+    val maxAnswerTokens: Int = 900,
+)
+
+private data class ChatContext(val settings: AppSettings, val game: GameProfile?, val thread: ChatThread?)
+private data class ChatInputs(val draft: String, val streaming: String, val generating: Boolean, val error: String?)
+
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val games: GameProfileRepository,
+    private val chats: ChatRepository,
+    private val settingsRepository: SettingsRepository,
+    private val provider: TextAiProvider,
+) : ViewModel() {
+    private val draft = MutableStateFlow("")
+    private val streaming = MutableStateFlow("")
+    private val generating = MutableStateFlow(false)
+    private val error = MutableStateFlow<String?>(null)
+    private var generationJob: Job? = null
+
+    private val context = settingsRepository.settings.flatMapLatest { settings ->
+        val gameId = settings.activeGameId ?: return@flatMapLatest flowOf(ChatContext(settings, null, null))
+        games.observeById(gameId).flatMapLatest { game ->
+            if (game == null) flowOf(ChatContext(settings, null, null))
+            else chats.observeLatestThread(gameId).map { ChatContext(settings, game, it) }
+        }
+    }
+
+    private val inputs = combine(draft, streaming, generating, error) { draft, streaming, generating, error ->
+        ChatInputs(draft, streaming, generating, error)
+    }
+
+    val state: StateFlow<GameChatState> = combine(context, inputs) { activeContext, inputs ->
+        GameChatState(
+            game = activeContext.game,
+            thread = activeContext.thread,
+            draft = inputs.draft,
+            streamingAnswer = inputs.streaming,
+            isGenerating = inputs.generating,
+            errorMessage = inputs.error,
+            model = activeContext.settings.aiModel,
+            maxAnswerTokens = activeContext.settings.maxAnswerTokens,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GameChatState())
+
+    fun setDraft(value: String) { draft.value = value.take(MAX_QUESTION_CHARS) }
+
+    fun dismissError() { error.value = null }
+
+    fun send() {
+        val snapshot = state.value
+        val game = snapshot.game ?: return
+        val question = snapshot.draft.trim()
+        if (question.isEmpty() || snapshot.isGenerating) return
+        draft.value = ""
+        error.value = null
+        streaming.value = ""
+        generationJob = viewModelScope.launch {
+            generating.value = true
+            try {
+                val session = chats.getOrCreateSession(game)
+                chats.addMessage(ChatMessage(UUID.randomUUID().toString(), session.id, ChatRole.USER, question, Instant.now()))
+                val history = chats.recentMessages(session.id, HISTORY_MESSAGE_LIMIT)
+                val request = AiAnswerRequest(
+                    systemPrompt = GamePromptBuilder().build(game),
+                    messages = history.map { AiChatMessage(it.role.name.lowercase(), it.content) },
+                    model = snapshot.model,
+                    maxTokens = snapshot.maxAnswerTokens,
+                )
+                provider.generateAnswer(request).collect { event ->
+                    when (event) {
+                        AiGenerationEvent.Started -> Unit
+                        is AiGenerationEvent.TextDelta -> streaming.value += event.text
+                        is AiGenerationEvent.Finished -> Unit
+                    }
+                }
+                val answer = streaming.value.trim()
+                if (answer.isEmpty()) error.value = "DeepSeek returned an empty answer. Try again."
+                else chats.addMessage(ChatMessage(UUID.randomUUID().toString(), session.id, ChatRole.ASSISTANT, answer, Instant.now()))
+                streaming.value = ""
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (throwable: Throwable) {
+                error.value = throwable.message ?: "The answer could not be generated."
+            } finally {
+                generating.value = false
+            }
+        }
+    }
+
+    fun stop() {
+        generationJob?.cancel()
+        generationJob = null
+        streaming.value = ""
+        generating.value = false
+    }
+
+    fun clearHistory() {
+        val gameId = state.value.game?.id ?: return
+        stop()
+        viewModelScope.launch { chats.clearGameHistory(gameId) }
+    }
+
+    private companion object {
+        const val MAX_QUESTION_CHARS = 2_000
+        const val HISTORY_MESSAGE_LIMIT = 14
+    }
+}

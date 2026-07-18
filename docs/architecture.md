@@ -21,7 +21,17 @@ Hilt connects device and data implementations to their domain contracts at the a
 2. Manual game profiles and their package/wiki relations are written transactionally to Room.
 3. Foreign keys cascade related rows when a profile is deleted.
 4. Game-library state combines repository flows with the saved active profile and exposes immutable UI state.
-5. Provider credentials added in a later slice use AES/GCM values encrypted by a non-exportable Android Keystore key. Plaintext keys are not placed in Room or DataStore.
+5. Provider credentials use AES/GCM values encrypted by a non-exportable Android Keystore key. Plaintext keys are not placed in Room or DataStore.
+
+## AI chat flow
+
+1. `ChatViewModel` resolves the manually selected active game and its latest local thread.
+2. `GamePromptBuilder` scopes the request to that game, platform, progress, and spoiler policy.
+3. Only the fourteen most recent local messages are included to limit cost and context growth.
+4. `TextAiProvider` is a domain interface; `DeepSeekTextAiProvider` is the first implementation.
+5. The provider streams SSE text deltas from DeepSeek V4 and supports coroutine cancellation.
+6. Completed user and assistant messages are persisted in Room. Partial output is deliberately not saved after cancellation.
+7. Provider errors are mapped to actionable messages without exposing response bodies, credentials, prompts, or stack traces.
 
 ## Display flow
 

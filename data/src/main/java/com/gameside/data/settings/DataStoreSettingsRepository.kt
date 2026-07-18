@@ -3,6 +3,7 @@ package com.gameside.data.settings
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gameside.domain.settings.AppSettings
@@ -22,6 +23,8 @@ class DataStoreSettingsRepository @Inject constructor(
         val activeGameId = stringPreferencesKey("active_game_id")
         val trueBlackMode = booleanPreferencesKey("true_black_mode")
         val reducedMotion = booleanPreferencesKey("reduced_motion")
+        val aiModel = stringPreferencesKey("ai_model")
+        val maxAnswerTokens = intPreferencesKey("max_answer_tokens")
     }
 
     override val settings: Flow<AppSettings> = context.gameSideDataStore.data.map { preferences ->
@@ -30,6 +33,8 @@ class DataStoreSettingsRepository @Inject constructor(
             activeGameId = preferences[Keys.activeGameId],
             trueBlackMode = preferences[Keys.trueBlackMode] ?: true,
             reducedMotion = preferences[Keys.reducedMotion] ?: false,
+            aiModel = preferences[Keys.aiModel] ?: "deepseek-v4-flash",
+            maxAnswerTokens = preferences[Keys.maxAnswerTokens] ?: 900,
         )
     }
 
@@ -49,5 +54,19 @@ class DataStoreSettingsRepository @Inject constructor(
 
     override suspend fun setReducedMotion(enabled: Boolean) {
         context.gameSideDataStore.edit { it[Keys.reducedMotion] = enabled }
+    }
+
+    override suspend fun setAiModel(model: String) {
+        require(model in SUPPORTED_MODELS)
+        context.gameSideDataStore.edit { it[Keys.aiModel] = model }
+    }
+
+    override suspend fun setMaxAnswerTokens(tokens: Int) {
+        require(tokens in 256..4_096)
+        context.gameSideDataStore.edit { it[Keys.maxAnswerTokens] = tokens }
+    }
+
+    private companion object {
+        val SUPPORTED_MODELS = setOf("deepseek-v4-flash", "deepseek-v4-pro")
     }
 }

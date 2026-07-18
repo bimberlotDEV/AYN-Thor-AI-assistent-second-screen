@@ -8,4 +8,6 @@ interface SettingsRepository {
     suspend fun setActiveGame(id: String?)
     suspend fun setTrueBlackMode(enabled: Boolean)
     suspend fun setReducedMotion(enabled: Boolean)
+    suspend fun setAiModel(model: String)
+    suspend fun setMaxAnswerTokens(tokens: Int)
 }

@@ -63,4 +63,25 @@ class GameSideDatabaseTest {
         assertEquals(0, dao.packageCount(profile.id))
         assertEquals(null, dao.observeById(profile.id).first())
     }
+
+    @Test
+    fun chatMessagesPersistInOrderAndCascadeWithGame() = runBlocking {
+        val profile = GameProfileEntity(
+            id = "chat-game", title = "Chat Game", platform = "EMULATED", coverImageUri = null,
+            spoilerLevel = "NONE", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
+        val chatDao = database.chatDao()
+        chatDao.insertSession(ChatSessionEntity("session", profile.id, profile.title, 2L, 2L))
+        chatDao.insertMessage(ChatMessageEntity("user", "session", "USER", "Question", 3L))
+        chatDao.insertMessage(ChatMessageEntity("assistant", "session", "ASSISTANT", "Answer", 4L))
+
+        val thread = chatDao.observeLatestThread(profile.id).first()
+        assertEquals(listOf("Question", "Answer"), thread?.messages?.sortedBy { it.createdAtEpochMillis }?.map { it.content })
+
+        dao.delete(profile.id)
+        assertEquals(null, chatDao.observeLatestThread(profile.id).first())
+    }
 }

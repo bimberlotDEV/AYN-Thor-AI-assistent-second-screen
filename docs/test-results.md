@@ -37,6 +37,15 @@ Local-first slice validation:
 - Full JVM tests, debug lint, debug APK assembly, installation, and launch passed after the system-inset UI fix.
 - No app crash occurred during onboarding, profile creation/edit, persistence restart, or instrumentation execution.
 
+Chat slice validation:
+
+- Database schema 1 migrated to schema 2 on the existing Huawei installation without losing the `Elden Ring` profile or onboarding state.
+- The Ask screen opened with `Elden Ring` as active game and rendered the spoiler-aware question field.
+- The provider screen exposed masked credential entry, encrypted storage action, current DeepSeek V4 model selection, and connection testing.
+- Three on-device instrumentation tests passed: game relations/cascade, chat ordering/cascade, and Keystore credential round-trip/removal.
+- JVM prompt tests, debug assembly, and Android lint passed.
+- A real paid provider request remains intentionally pending until the key is entered directly in the on-device secure field; secrets are not transferred through ADB command logs.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

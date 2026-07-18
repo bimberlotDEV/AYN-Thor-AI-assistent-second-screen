@@ -18,8 +18,9 @@ The repository now contains the validated display proof of concept plus the firs
 - a searchable manual game library with add, edit, delete, pin, active-game, platform, package, and spoiler controls;
 - Room persistence with an exported version-1 schema;
 - DataStore app settings and Android Keystore-backed encrypted credential storage contracts.
+- per-game DeepSeek V4 chat with streaming output, cancellation, local history, model selection, and spoiler-aware prompts.
 
-AI, wiki retrieval, notes, and checklist features build on these local domain and repository boundaries. No fake AI behavior is exposed in the UI.
+The first real AI chat is now implemented. Source-backed wiki retrieval, citations, notes, bookmarks, and checklists are the next product slices; the app does not pretend that general model knowledge is sourced.
 
 ## Build
 
@@ -54,3 +55,5 @@ See [device testing](docs/device-testing.md) for the Huawei P30 Lite, simulated 
 The module boundaries and display data flow are documented in [architecture](docs/architecture.md).
 
 Recorded hardware and simulated-display results are available in [device test results](docs/test-results.md).
+
+DeepSeek configuration and the exact request/privacy behavior are documented in [AI provider setup](docs/ai-provider-setup.md).
