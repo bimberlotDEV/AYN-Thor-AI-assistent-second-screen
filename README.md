@@ -4,7 +4,7 @@ GameSide AI is a private, native Android gaming companion designed to remain usa
 
 ## Current milestone
 
-The repository currently contains the technical proof of concept required before AI development:
+The repository now contains the validated display proof of concept plus the first local-first product slice:
 
 - live Android display discovery and diagnostics;
 - capability-based secondary-display selection without hard-coded display IDs;
@@ -13,9 +13,13 @@ The repository currently contains the technical proof of concept required before
 - explicit launch of a mapped Android game package on the primary display;
 - safe single-screen fallback;
 - an OLED-friendly Compose interface;
-- isolated device/domain/UI modules and selection-policy tests.
+- isolated device/domain/UI modules and selection-policy tests;
+- first-run privacy onboarding with persistent completion state;
+- a searchable manual game library with add, edit, delete, pin, active-game, platform, package, and spoiler controls;
+- Room persistence with an exported version-1 schema;
+- DataStore app settings and Android Keystore-backed encrypted credential storage contracts.
 
-AI, wiki, database, notes, and checklist features intentionally follow only after this foundation is validated.
+AI, wiki retrieval, notes, and checklist features build on these local domain and repository boundaries. No fake AI behavior is exposed in the UI.
 
 ## Build
 
@@ -43,7 +47,7 @@ The application ID defaults to `com.gameside.ai`. Override it without editing so
 
 ## Privacy at this milestone
 
-The proof of concept requests no sensitive permissions, performs no analytics, records no audio or screen content, has no network permission, and stores no credentials. It queries only launcher activities to support an explicitly entered game package.
+The app requests no sensitive permissions, performs no analytics, records no audio or screen content, and currently has no network permission. Profiles and settings remain local. The credential store is ready for later user-supplied provider keys and encrypts values with an Android Keystore AES/GCM key; no API key is bundled or currently requested. Game lookup remains limited to launcher activities and explicitly entered packages.
 
 See [device testing](docs/device-testing.md) for the Huawei P30 Lite, simulated displays, and AYN Thor acceptance procedure.
 

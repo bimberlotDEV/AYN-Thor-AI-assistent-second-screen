@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "GameSideAI"
-include(":app", ":core", ":domain", ":device", ":features")
+include(":app", ":core", ":data", ":domain", ":device", ":features")

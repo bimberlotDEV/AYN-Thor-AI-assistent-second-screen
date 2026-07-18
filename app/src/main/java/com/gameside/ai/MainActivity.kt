@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import com.gameside.core.design.GameSideTheme
 import com.gameside.device.CompanionLaunchResult
 import com.gameside.device.SecondaryDisplayLauncher
-import com.gameside.features.display.DisplayDashboardRoute
+import com.gameside.features.home.GameSideHomeRoute
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GameSideTheme {
-                DisplayDashboardRoute(
+                GameSideHomeRoute(
                     onLaunchCompanion = { displayId -> launchCompanion(displayId) },
                     onOpenSingleScreen = { launchCompanion(null) },
                 )

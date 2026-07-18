@@ -19,7 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +36,11 @@ import com.gameside.domain.display.DeviceDisplayInfo
 fun DisplayDashboardRoute(
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
+    modifier: Modifier = Modifier,
     viewModel: DisplayDashboardViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    DisplayDashboardScreen(state, onLaunchCompanion, onOpenSingleScreen)
+    DisplayDashboardScreen(state, onLaunchCompanion, onOpenSingleScreen, modifier)
 }
 
 @Composable
@@ -48,17 +48,17 @@ private fun DisplayDashboardScreen(
     state: DisplayDashboardState,
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
+    modifier: Modifier = Modifier,
 ) {
     var launchMessage by remember { mutableStateOf<String?>(null) }
     fun describe(result: CompanionLaunchResult): String = when (result) {
         is CompanionLaunchResult.Success -> "Companion launch requested on display ${result.displayId}"
         is CompanionLaunchResult.Failure -> result.reason
     }
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize().padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
             item {
                 Spacer(Modifier.height(12.dp))
                 Text("GameSide AI", style = MaterialTheme.typography.headlineMedium)
@@ -94,7 +94,6 @@ private fun DisplayDashboardScreen(
                 }
                 Spacer(Modifier.height(20.dp))
             }
-        }
     }
 }
 

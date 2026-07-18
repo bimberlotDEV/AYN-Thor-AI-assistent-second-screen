@@ -25,11 +25,23 @@ Validated behavior:
 - The simulated display received different IDs across sessions, confirming that display IDs must be treated as ephemeral.
 - The original `overlay_display_devices` setting was restored to `null` and temporary on-device test artifacts were removed.
 
+Local-first slice validation:
+
+- Fresh install showed the privacy onboarding and the action remained fully visible above Huawei's system navigation area.
+- Completing onboarding created `gameside_settings.preferences_pb`; force-stop and cold restart opened the game library instead of repeating onboarding.
+- Manual creation and edit produced an active `Elden Ring` profile with the selected platform and spoiler level.
+- The profile remained present after force-stop and cold restart.
+- The on-device Room database (`gameside.db`) and DataStore file were confirmed inside the app sandbox.
+- The Room instrumentation test ran on Android 9 and verified transactional relation replacement plus foreign-key cascade deletion.
+- The Keystore instrumentation test verified encrypted credential write, read, presence, and removal on the Huawei hardware.
+- Full JVM tests, debug lint, debug APK assembly, installation, and launch passed after the system-inset UI fix.
+- No app crash occurred during onboarding, profile creation/edit, persistence restart, or instrumentation execution.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.
 - Concurrent game on the primary physical screen and companion touch on the lower AYN Thor screen.
 - Real AYN display disable/re-enable, lid, focus, and firmware behavior.
-- Launching a mapped game through the text field. Automated entry was intercepted by the Huawei's first-run SwiftKey setup, so this remains a manual test rather than changing the owner's keyboard configuration.
+- Launching a mapped game package on the primary display. Profile text entry now works through the existing keyboard, but no third-party game package was selected or launched during this run.
 
 The Huawei results validate the standards-based display/activity implementation but do not replace the AYN Thor acceptance gate.

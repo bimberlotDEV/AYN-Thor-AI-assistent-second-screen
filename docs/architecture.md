@@ -2,17 +2,26 @@
 
 ## Goal of the current slice
 
-The current release proves the Android multi-display boundary before any AI, network, or persistence code is introduced. It intentionally contains no pretend chat or wiki behavior.
+The current release combines the validated Android multi-display boundary with a tested local-first persistence foundation. It intentionally contains no pretend chat or wiki behavior.
 
 ## Modules
 
 - `app` owns Android entry points, manifest policy, application wiring, and the configurable application ID.
 - `core` owns the reusable OLED-first Compose theme and will later contain common UI primitives.
-- `domain` is Android-free. It owns display models, the repository contract, and deterministic selection policy.
+- `domain` is Android-free. It owns display and game models, repository contracts, settings, credential contracts, and deterministic selection policy.
 - `device` is the only module that knows about `DisplayManager`, `ActivityOptions`, package launching, and Android display flags.
-- `features` owns presentation state and Compose screens; it depends on domain contracts rather than framework implementations.
+- `data` owns Room entities and DAO code, DataStore settings, Keystore encryption, and repository implementations.
+- `features` owns onboarding, the game library, display presentation state, and Compose screens; it depends on domain contracts rather than framework implementations.
 
-Hilt connects `DisplayRepository` to `AndroidDisplayRepository` at the application boundary. UI code never enumerates displays or launches packages directly.
+Hilt connects device and data implementations to their domain contracts at the application boundary. UI code never enumerates displays, opens a database, handles encryption, or launches packages directly.
+
+## Local data flow
+
+1. Onboarding completion and active-game selection are written to a preferences DataStore.
+2. Manual game profiles and their package/wiki relations are written transactionally to Room.
+3. Foreign keys cascade related rows when a profile is deleted.
+4. Game-library state combines repository flows with the saved active profile and exposes immutable UI state.
+5. Provider credentials added in a later slice use AES/GCM values encrypted by a non-exportable Android Keystore key. Plaintext keys are not placed in Room or DataStore.
 
 ## Display flow
 
@@ -32,8 +41,9 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 - No sensitive Android permission is requested.
 - Game discovery is limited to launcher activities and explicit package names; `QUERY_ALL_PACKAGES` is not used.
 - Cleartext networking is disabled even though this milestone has no internet permission.
-- No prompts, credentials, screenshots, notes, or analytics exist in this milestone.
+- No prompts, provider credentials, screenshots, notes, or analytics are collected in this milestone.
+- Android backup remains disabled, so local profiles, settings, and future encrypted values are not copied to cloud backup.
 
 ## Next architecture increment
 
-After the display flow is validated on a real device, add the `data` module with Room, DataStore, Keystore-backed credential storage, repository implementations, and manual game profiles. AI and MediaWiki providers remain behind domain interfaces and are added only after that local-first foundation is tested.
+Add provider-neutral chat and MediaWiki domain interfaces, then implement an explicitly configured OpenAI-compatible provider and sourced retrieval. Provider calls remain disabled until the user supplies credentials and submits a request.
