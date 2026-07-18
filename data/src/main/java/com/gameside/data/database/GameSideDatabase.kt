@@ -15,12 +15,14 @@ import androidx.room.RoomDatabase
         GameNoteEntity::class,
         GameChecklistEntity::class,
         ChecklistItemEntity::class,
+        KnowledgeCacheEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class GameSideDatabase : RoomDatabase() {
     abstract fun gameProfileDao(): GameProfileDao
     abstract fun chatDao(): ChatDao
     abstract fun personalToolsDao(): PersonalToolsDao
+    abstract fun knowledgeCacheDao(): KnowledgeCacheDao
 }

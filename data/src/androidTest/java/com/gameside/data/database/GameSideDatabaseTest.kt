@@ -118,4 +118,25 @@ class GameSideDatabaseTest {
         assertEquals(emptyList<GameNoteEntity>(), tools.observeNotes(profile.id).first())
         assertEquals(emptyList<ChecklistWithItems>(), tools.observeChecklists(profile.id).first())
     }
+
+    @Test
+    fun knowledgeCachePersistsClearsAndCascades() = runBlocking {
+        val profile = GameProfileEntity(
+            id = "cache-game", title = "Cache Game", platform = "OTHER", coverImageUri = null,
+            spoilerLevel = "NONE", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
+        val cache = database.knowledgeCacheDao()
+        val page = KnowledgeCacheEntity(profile.id, "https://game.wiki/api.php", "42", "Item", "Game Wiki", "https://game.wiki/index.php?curid=42", "Cached guide", 2L)
+        cache.upsert(page)
+        assertEquals("Cached guide", cache.get(profile.id, page.sourceApiUrl, page.pageId)?.plainText)
+        assertEquals(1, cache.observe(profile.id).first().size)
+        cache.clear(profile.id)
+        assertEquals(0, cache.observe(profile.id).first().size)
+        cache.upsert(page)
+        dao.delete(profile.id)
+        assertEquals(0, cache.observe(profile.id).first().size)
+    }
 }

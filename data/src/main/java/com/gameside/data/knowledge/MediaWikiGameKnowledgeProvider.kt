@@ -26,7 +26,7 @@ class MediaWikiGameKnowledgeProvider @Inject constructor() : GameKnowledgeProvid
     override suspend fun search(game: GameProfile, query: String): List<KnowledgeSearchResult> = withContext(Dispatchers.IO) {
         val source = resolveSource(game) ?: return@withContext emptyList()
         searchQueries(game, query).asSequence()
-            .flatMap { searchOnce(source, it).asSequence() }
+            .flatMap { searchOnce(game.id, source, it).asSequence() }
             .distinctBy(KnowledgeSearchResult::id)
             .take(SEARCH_LIMIT)
             .toList()
@@ -84,7 +84,7 @@ class MediaWikiGameKnowledgeProvider @Inject constructor() : GameKnowledgeProvid
             .distinct()
     }
 
-    private fun searchOnce(source: WikiSource, searchText: String): List<KnowledgeSearchResult> {
+    private fun searchOnce(gameProfileId: String, source: WikiSource, searchText: String): List<KnowledgeSearchResult> {
         val url = "${source.endpoint}?action=query&list=search&srnamespace=0&srlimit=$PER_QUERY_LIMIT&format=json&formatversion=2&srsearch=${searchText.encoded()}"
         val array = request(url).getJSONObject("query").getJSONArray("search")
         return buildList {
@@ -95,6 +95,7 @@ class MediaWikiGameKnowledgeProvider @Inject constructor() : GameKnowledgeProvid
                 add(
                     KnowledgeSearchResult(
                         id = pageId,
+                        gameProfileId = gameProfileId,
                         title = title,
                         sourceName = source.name,
                         sourceApiUrl = source.endpoint,

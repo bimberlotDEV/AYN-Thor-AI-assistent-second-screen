@@ -10,14 +10,16 @@ import com.gameside.data.database.ChatDao
 import com.gameside.data.database.GameProfileDao
 import com.gameside.data.database.GameSideDatabase
 import com.gameside.data.database.PersonalToolsDao
+import com.gameside.data.database.KnowledgeCacheDao
 import com.gameside.data.game.RoomGameProfileRepository
-import com.gameside.data.knowledge.MediaWikiGameKnowledgeProvider
+import com.gameside.data.knowledge.CachingGameKnowledgeProvider
 import com.gameside.data.personal.RoomPersonalToolsRepository
 import com.gameside.data.security.KeystoreCredentialStore
 import com.gameside.data.settings.DataStoreSettingsRepository
 import com.gameside.domain.game.GameProfileRepository
 import com.gameside.domain.knowledge.GameKnowledgeProvider
 import com.gameside.domain.knowledge.KnowledgeRetriever
+import com.gameside.domain.knowledge.KnowledgeCacheRepository
 import com.gameside.domain.personal.PersonalToolsRepository
 import com.gameside.domain.ai.TextAiProvider
 import com.gameside.domain.chat.ChatRepository
@@ -39,7 +41,8 @@ abstract class DataBindingsModule {
     @Binds @Singleton abstract fun bindCredentialStore(value: KeystoreCredentialStore): CredentialStore
     @Binds @Singleton abstract fun bindChatRepository(value: RoomChatRepository): ChatRepository
     @Binds @Singleton abstract fun bindTextAiProvider(value: DeepSeekTextAiProvider): TextAiProvider
-    @Binds @Singleton abstract fun bindKnowledgeProvider(value: MediaWikiGameKnowledgeProvider): GameKnowledgeProvider
+    @Binds @Singleton abstract fun bindKnowledgeProvider(value: CachingGameKnowledgeProvider): GameKnowledgeProvider
+    @Binds @Singleton abstract fun bindKnowledgeCache(value: CachingGameKnowledgeProvider): KnowledgeCacheRepository
     @Binds @Singleton abstract fun bindPersonalToolsRepository(value: RoomPersonalToolsRepository): PersonalToolsRepository
 }
 
@@ -50,7 +53,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): GameSideDatabase =
         Room.databaseBuilder(context, GameSideDatabase::class.java, "gameside.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
 
@@ -62,6 +65,9 @@ object DatabaseModule {
 
     @Provides
     fun providePersonalToolsDao(database: GameSideDatabase): PersonalToolsDao = database.personalToolsDao()
+
+    @Provides
+    fun provideKnowledgeCacheDao(database: GameSideDatabase): KnowledgeCacheDao = database.knowledgeCacheDao()
 
     @Provides
     @Singleton
@@ -100,6 +106,13 @@ object DatabaseModule {
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_game_checklists_gameProfileId` ON `game_checklists` (`gameProfileId`)")
             db.execSQL("""CREATE TABLE IF NOT EXISTS `checklist_items` (`id` TEXT NOT NULL, `checklistId` TEXT NOT NULL, `text` TEXT NOT NULL, `isChecked` INTEGER NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`checklistId`) REFERENCES `game_checklists`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""")
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_checklist_items_checklistId` ON `checklist_items` (`checklistId`)")
+        }
+    }
+
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""CREATE TABLE IF NOT EXISTS `knowledge_cache` (`gameProfileId` TEXT NOT NULL, `sourceApiUrl` TEXT NOT NULL, `pageId` TEXT NOT NULL, `title` TEXT NOT NULL, `sourceName` TEXT NOT NULL, `url` TEXT NOT NULL, `plainText` TEXT NOT NULL, `retrievedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`gameProfileId`, `sourceApiUrl`, `pageId`), FOREIGN KEY(`gameProfileId`) REFERENCES `game_profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_knowledge_cache_gameProfileId` ON `knowledge_cache` (`gameProfileId`)")
         }
     }
 }

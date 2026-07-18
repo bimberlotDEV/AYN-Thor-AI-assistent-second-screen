@@ -68,6 +68,16 @@ Personal tools validation:
 - A real Moonveil answer was bookmarked from chat and appeared under the new `Saved` navigation destination with its original question, answer, and stored source count.
 - The Saved screen, note/checklist creation dialogs, delete actions, and offline checklist toggles render without AndroidRuntime or Room errors.
 
+Offline game-wiki validation:
+
+- Database schema 4 migrated to schema 5 on the existing Huawei installation without losing the active game, chat, personal tools, onboarding state, or Keystore-backed credential.
+- Five Huawei instrumentation tests pass. The new test verifies wiki-document persistence, explicit cache clearing, and foreign-key cascade deletion.
+- A live Wiki search against the automatically selected Elden Ring game wiki downloaded pages and exposed them under `Downloaded pages - available offline`.
+- Force-stop and cold restart retained the downloaded pages, proving the Wiki destination renders persisted cache data rather than transient search state.
+- The active `minimal` spoiler policy hid cached article previews and required an intentional source-open action.
+- The Wiki destination reported current connectivity, exposed a clear-cache control, and rendered without `AndroidRuntime`, Room, SQLite, or migration errors.
+- JVM tests (including strict spoiler evidence limits), debug lint, and debug APK assembly passed with Room schema 5.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

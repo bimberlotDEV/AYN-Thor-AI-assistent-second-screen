@@ -1,6 +1,7 @@
 package com.gameside.domain.knowledge
 
 import com.gameside.domain.game.GameProfile
+import com.gameside.domain.game.SpoilerLevel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -21,9 +22,10 @@ class KnowledgeRetriever(private val provider: GameKnowledgeProvider) {
             .map { document -> document to score(document, game, queryTerms, questionTerms) }
             .sortedByDescending { it.second }
         val bestScore = candidates.firstOrNull()?.second ?: 0
+        val effectiveLimit = if (game.spoilerLevel == SpoilerLevel.NONE) 1 else limit
         val documents = candidates
             .filter { (_, score) -> score * SCORE_RATIO_DENOMINATOR >= bestScore * SCORE_RATIO_NUMERATOR }
-            .take(limit)
+            .take(effectiveLimit)
             .map { it.first }
         if (documents.isEmpty()) return@coroutineScope RetrievedKnowledge.Empty
 
@@ -32,7 +34,7 @@ class KnowledgeRetriever(private val provider: GameKnowledgeProvider) {
                 title = document.result.title,
                 sourceName = document.result.sourceName,
                 url = document.result.url,
-                excerpt = document.plainText.clean().take(MAX_EXCERPT_CHARS),
+                excerpt = document.plainText.clean().take(excerptLimit(game.spoilerLevel)),
                 retrievedAt = document.retrievedAt,
             )
         }
@@ -62,6 +64,13 @@ class KnowledgeRetriever(private val provider: GameKnowledgeProvider) {
     }
 
     private fun String.clean() = replace(Regex("\\s+"), " ").trim()
+
+    private fun excerptLimit(level: SpoilerLevel): Int = when (level) {
+        SpoilerLevel.NONE -> 400
+        SpoilerLevel.MINIMAL -> 650
+        SpoilerLevel.MODERATE -> 850
+        SpoilerLevel.FULL -> MAX_EXCERPT_CHARS
+    }
 
     private companion object {
         val TOKEN = Regex("[\\p{L}\\p{N}']+")

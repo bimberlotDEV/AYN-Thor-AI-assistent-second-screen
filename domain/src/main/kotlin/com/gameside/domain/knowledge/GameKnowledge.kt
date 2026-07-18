@@ -5,6 +5,7 @@ import java.time.Instant
 
 data class KnowledgeSearchResult(
     val id: String,
+    val gameProfileId: String,
     val title: String,
     val sourceName: String,
     val sourceApiUrl: String,
@@ -36,4 +37,9 @@ data class RetrievedKnowledge(
 interface GameKnowledgeProvider {
     suspend fun search(game: GameProfile, query: String): List<KnowledgeSearchResult>
     suspend fun retrieve(result: KnowledgeSearchResult): KnowledgeDocument
+}
+
+interface KnowledgeCacheRepository {
+    fun observeCached(gameProfileId: String): kotlinx.coroutines.flow.Flow<List<KnowledgeDocument>>
+    suspend fun clear(gameProfileId: String)
 }

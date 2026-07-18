@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Chat
-import androidx.compose.material.icons.rounded.DeveloperBoard
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -28,12 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gameside.device.CompanionLaunchResult
-import com.gameside.features.display.DisplayDashboardRoute
 import com.gameside.features.chat.ChatRoute
 import com.gameside.features.game.GameLibraryRoute
 import com.gameside.features.onboarding.OnboardingScreen
 import com.gameside.features.personal.PersonalToolsRoute
-import com.gameside.features.settings.ProviderSettingsRoute
+import com.gameside.features.wiki.WikiRoute
 
 @Composable
 fun GameSideHomeRoute(
@@ -73,8 +72,8 @@ private fun HomeContent(
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Rounded.SportsEsports, contentDescription = null) },
-                    label = { Text("Games") },
+                    icon = { Icon(Icons.Rounded.Language, contentDescription = null) },
+                    label = { Text("Wiki") },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
@@ -85,28 +84,24 @@ private fun HomeContent(
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Rounded.DeveloperBoard, contentDescription = null) },
-                    label = { Text("Displays") },
+                    icon = { Icon(Icons.Rounded.SportsEsports, contentDescription = null) },
+                    label = { Text("Games") },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
                     onClick = { selectedTab = 4 },
-                    icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
-                    label = { Text("Settings") },
+                    icon = { Icon(Icons.Rounded.MoreHoriz, contentDescription = null) },
+                    label = { Text("More") },
                 )
             }
         },
     ) { padding ->
         when (selectedTab) {
             0 -> ChatRoute(Modifier.padding(padding))
-            1 -> GameLibraryRoute(Modifier.padding(padding))
+            1 -> WikiRoute(Modifier.padding(padding))
             2 -> PersonalToolsRoute(Modifier.padding(padding))
-            3 -> DisplayDashboardRoute(
-                onLaunchCompanion = onLaunchCompanion,
-                onOpenSingleScreen = onOpenSingleScreen,
-                modifier = Modifier.padding(padding),
-            )
-            else -> ProviderSettingsRoute(Modifier.padding(padding))
+            3 -> GameLibraryRoute(Modifier.padding(padding))
+            else -> MoreRoute(onLaunchCompanion, onOpenSingleScreen, Modifier.padding(padding))
         }
     }
 }

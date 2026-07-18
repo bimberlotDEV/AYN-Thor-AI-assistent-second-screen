@@ -2,7 +2,7 @@
 
 ## Goal of the current slice
 
-The current release combines the validated Android multi-display boundary with local-first profiles, real DeepSeek chat, and the first conservative source-backed retrieval path.
+The current release combines the validated Android multi-display boundary with local-first profiles, real DeepSeek chat, conservative source-backed retrieval, and an offline-capable game-wiki browser.
 
 ## Modules
 
@@ -24,6 +24,7 @@ Hilt connects device and data implementations to their domain contracts at the a
 5. Provider credentials use AES/GCM values encrypted by a non-exportable Android Keystore key. Plaintext keys are not placed in Room or DataStore.
 6. Saved answers, notes, checklists, and checklist items are stored under the active game in Room schema 4 and cascade when that game is deleted.
 7. Saved-answer citations are encoded as structured JSON inside the saved record so the bookmark remains independent if chat history is cleared.
+8. Retrieved wiki documents are stored per game in Room schema 5. Cached documents expire for network retrieval after seven days, remain visible offline, and cascade when their game is deleted.
 
 ## AI chat flow
 
@@ -40,11 +41,13 @@ Hilt connects device and data implementations to their domain contracts at the a
 1. `GameKnowledgeProvider` separates search and document retrieval from the chat and AI vendors.
 2. `MediaWikiGameKnowledgeProvider` uses a profile's configured HTTPS wiki or probes conventional wiki.gg/Fandom hosts derived from the active game title.
 3. It searches the selected game wiki and supports both the optional TextExtracts module and a sanitized rendered-page fallback used by wiki.gg.
-4. `KnowledgeRetriever` fetches candidate documents concurrently, rejects documents without question-specific term overlap, ranks the remainder, and keeps only results close to the best score.
-5. Numbered evidence is added to the system prompt. The model may cite only those numbers and must disclose when it falls back to general knowledge.
-6. The exact source metadata and short excerpt used for an answer are stored with that assistant message in Room schema 3.
-7. Source buttons remain available in local chat history and open the original HTTPS page.
-8. Retrieval failures never block chat; they produce an explicitly unsourced model-knowledge request instead of fabricated citations.
+4. `CachingGameKnowledgeProvider` serves fresh matching documents locally and writes successful network retrievals to Room before the shared `KnowledgeRetriever` ranks them.
+5. `KnowledgeRetriever` fetches candidate documents concurrently, rejects documents without question-specific term overlap, ranks the remainder, and keeps only results close to the best score. Evidence limits become stricter as spoiler protection increases.
+6. Numbered evidence is added to the system prompt. The model may cite only those numbers and must disclose when it falls back to general knowledge.
+7. The exact source metadata and short excerpt used for an answer are stored with that assistant message in Room schema 3.
+8. Source buttons remain available in local chat history and open the original HTTPS page.
+9. The Wiki destination exposes search, connectivity state, cached pages, cache clearing, and spoiler-aware previews through the same provider contracts used by chat.
+10. Retrieval failures never block chat; they produce an explicitly unsourced model-knowledge request instead of fabricated citations.
 
 ## Display flow
 
@@ -69,4 +72,4 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 
 ## Next architecture increment
 
-Add cached wiki browsing and explicit source diagnostics, followed by privacy/export controls and richer conversation management.
+Add privacy/export/reset controls, explicit source diagnostics, and richer conversation management.
