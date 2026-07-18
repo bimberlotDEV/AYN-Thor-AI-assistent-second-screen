@@ -10,8 +10,9 @@ import androidx.room.RoomDatabase
         GameWikiSourceEntity::class,
         ChatSessionEntity::class,
         ChatMessageEntity::class,
+        SourceCitationEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class GameSideDatabase : RoomDatabase() {

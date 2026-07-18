@@ -24,10 +24,12 @@ Only an explicitly submitted request leaves the device. It contains:
 - up to fourteen recent messages in that game's current conversation;
 - the new question.
 
+Before generation, the active game title and question are also sent to Wikipedia's public MediaWiki API. Only short relevant plaintext extracts are forwarded to DeepSeek as numbered evidence. Source metadata is stored with the answer and can be opened from chat history.
+
 Game profiles and completed chat messages remain in the local Room database. Removing the credential prevents future provider requests without deleting local game or chat data.
 
 Official reference: [DeepSeek API quick start](https://api-docs.deepseek.com/).
 
 ## Current limitation
 
-This first chat slice uses general model knowledge. Wiki retrieval and verified source citations are not attached yet, so the prompt explicitly forbids fabricated citations and asks the model to identify uncertainty. Source-backed retrieval is the next knowledge phase.
+Wikipedia is a broad encyclopedia and does not contain every item, quest, build, or patch detail. Retrieval therefore rejects weak matches and falls back to clearly identified general model knowledge when no relevant evidence is available. Configurable game-specific wiki providers are still planned.

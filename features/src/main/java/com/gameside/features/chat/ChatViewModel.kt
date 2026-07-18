@@ -13,6 +13,8 @@ import com.gameside.domain.chat.ChatRole
 import com.gameside.domain.chat.ChatThread
 import com.gameside.domain.game.GameProfile
 import com.gameside.domain.game.GameProfileRepository
+import com.gameside.domain.knowledge.KnowledgeRetriever
+import com.gameside.domain.knowledge.SourceCitation
 import com.gameside.domain.settings.AppSettings
 import com.gameside.domain.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,13 +38,30 @@ data class GameChatState(
     val draft: String = "",
     val streamingAnswer: String = "",
     val isGenerating: Boolean = false,
+    val isSearchingSources: Boolean = false,
+    val streamingCitations: List<SourceCitation> = emptyList(),
     val errorMessage: String? = null,
     val model: String = "deepseek-v4-flash",
     val maxAnswerTokens: Int = 900,
 )
 
 private data class ChatContext(val settings: AppSettings, val game: GameProfile?, val thread: ChatThread?)
-private data class ChatInputs(val draft: String, val streaming: String, val generating: Boolean, val error: String?)
+private data class ChatInputs(
+    val draft: String,
+    val streaming: String,
+    val generating: Boolean,
+    val searchingSources: Boolean,
+    val citations: List<SourceCitation>,
+    val error: String?,
+)
+
+private data class ChatInputContent(
+    val draft: String,
+    val streaming: String,
+    val generating: Boolean,
+    val searchingSources: Boolean,
+    val citations: List<SourceCitation>,
+)
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -51,10 +70,13 @@ class ChatViewModel @Inject constructor(
     private val chats: ChatRepository,
     private val settingsRepository: SettingsRepository,
     private val provider: TextAiProvider,
+    private val knowledgeRetriever: KnowledgeRetriever,
 ) : ViewModel() {
     private val draft = MutableStateFlow("")
     private val streaming = MutableStateFlow("")
     private val generating = MutableStateFlow(false)
+    private val searchingSources = MutableStateFlow(false)
+    private val streamingCitations = MutableStateFlow<List<SourceCitation>>(emptyList())
     private val error = MutableStateFlow<String?>(null)
     private var generationJob: Job? = null
 
@@ -66,8 +88,15 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private val inputs = combine(draft, streaming, generating, error) { draft, streaming, generating, error ->
-        ChatInputs(draft, streaming, generating, error)
+    private val inputContent = combine(draft, streaming, generating, searchingSources, streamingCitations) {
+            draft, streaming, generating, searchingSources, citations ->
+        ChatInputContent(draft, streaming, generating, searchingSources, citations)
+    }
+
+    private val inputs = combine(inputContent, error) { content, error ->
+        ChatInputs(
+            content.draft, content.streaming, content.generating, content.searchingSources, content.citations, error,
+        )
     }
 
     val state: StateFlow<GameChatState> = combine(context, inputs) { activeContext, inputs ->
@@ -77,6 +106,8 @@ class ChatViewModel @Inject constructor(
             draft = inputs.draft,
             streamingAnswer = inputs.streaming,
             isGenerating = inputs.generating,
+            isSearchingSources = inputs.searchingSources,
+            streamingCitations = inputs.citations,
             errorMessage = inputs.error,
             model = activeContext.settings.aiModel,
             maxAnswerTokens = activeContext.settings.maxAnswerTokens,
@@ -88,6 +119,7 @@ class ChatViewModel @Inject constructor(
     fun dismissError() { error.value = null }
 
     fun send() {
+        if (generationJob?.isActive == true) return
         val snapshot = state.value
         val game = snapshot.game ?: return
         val question = snapshot.draft.trim()
@@ -95,14 +127,20 @@ class ChatViewModel @Inject constructor(
         draft.value = ""
         error.value = null
         streaming.value = ""
+        streamingCitations.value = emptyList()
         generationJob = viewModelScope.launch {
             generating.value = true
             try {
                 val session = chats.getOrCreateSession(game)
                 chats.addMessage(ChatMessage(UUID.randomUUID().toString(), session.id, ChatRole.USER, question, Instant.now()))
                 val history = chats.recentMessages(session.id, HISTORY_MESSAGE_LIMIT)
+                searchingSources.value = true
+                val knowledge = runCatching { knowledgeRetriever.retrieve(game, question) }
+                    .getOrElse { com.gameside.domain.knowledge.RetrievedKnowledge.Empty }
+                searchingSources.value = false
+                streamingCitations.value = knowledge.citations
                 val request = AiAnswerRequest(
-                    systemPrompt = GamePromptBuilder().build(game),
+                    systemPrompt = GamePromptBuilder().build(game, knowledge),
                     messages = history.map { AiChatMessage(it.role.name.lowercase(), it.content) },
                     model = snapshot.model,
                     maxTokens = snapshot.maxAnswerTokens,
@@ -116,13 +154,19 @@ class ChatViewModel @Inject constructor(
                 }
                 val answer = streaming.value.trim()
                 if (answer.isEmpty()) error.value = "DeepSeek returned an empty answer. Try again."
-                else chats.addMessage(ChatMessage(UUID.randomUUID().toString(), session.id, ChatRole.ASSISTANT, answer, Instant.now()))
+                else chats.addMessage(
+                    ChatMessage(
+                        UUID.randomUUID().toString(), session.id, ChatRole.ASSISTANT, answer, Instant.now(), knowledge.citations,
+                    ),
+                )
                 streaming.value = ""
+                streamingCitations.value = emptyList()
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                 throw cancelled
             } catch (throwable: Throwable) {
                 error.value = throwable.message ?: "The answer could not be generated."
             } finally {
+                searchingSources.value = false
                 generating.value = false
             }
         }
@@ -132,6 +176,8 @@ class ChatViewModel @Inject constructor(
         generationJob?.cancel()
         generationJob = null
         streaming.value = ""
+        streamingCitations.value = emptyList()
+        searchingSources.value = false
         generating.value = false
     }
 

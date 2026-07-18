@@ -22,18 +22,23 @@ abstract class ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     protected abstract suspend fun insertMessageEntity(message: ChatMessageEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    protected abstract suspend fun insertCitationEntities(citations: List<SourceCitationEntity>)
+
     @Query("UPDATE chat_sessions SET updatedAtEpochMillis = :updatedAt WHERE id = :sessionId")
     protected abstract suspend fun touchSession(sessionId: String, updatedAt: Long)
 
+    @Transaction
     @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY createdAtEpochMillis DESC LIMIT :limit")
-    abstract suspend fun recentMessages(sessionId: String, limit: Int): List<ChatMessageEntity>
+    abstract suspend fun recentMessages(sessionId: String, limit: Int): List<ChatMessageWithCitations>
 
     @Query("DELETE FROM chat_sessions WHERE gameProfileId = :gameId")
     abstract suspend fun clearGameHistory(gameId: String)
 
     @Transaction
-    open suspend fun insertMessage(message: ChatMessageEntity) {
-        insertMessageEntity(message)
-        touchSession(message.sessionId, message.createdAtEpochMillis)
+    open suspend fun insertMessage(message: ChatMessageWithCitations) {
+        insertMessageEntity(message.message)
+        if (message.citations.isNotEmpty()) insertCitationEntities(message.citations)
+        touchSession(message.message.sessionId, message.message.createdAtEpochMillis)
     }
 }

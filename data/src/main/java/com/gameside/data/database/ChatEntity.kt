@@ -46,8 +46,37 @@ data class ChatMessageEntity(
     val createdAtEpochMillis: Long,
 )
 
+@Entity(
+    tableName = "source_citations",
+    primaryKeys = ["messageId", "position"],
+    foreignKeys = [
+        ForeignKey(
+            entity = ChatMessageEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["messageId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("messageId")],
+)
+data class SourceCitationEntity(
+    val messageId: String,
+    val position: Int,
+    val title: String,
+    val sourceName: String,
+    val url: String,
+    val excerpt: String,
+    val retrievedAtEpochMillis: Long,
+)
+
+data class ChatMessageWithCitations(
+    @Embedded val message: ChatMessageEntity,
+    @Relation(parentColumn = "id", entityColumn = "messageId")
+    val citations: List<SourceCitationEntity>,
+)
+
 data class ChatThreadEntity(
     @Embedded val session: ChatSessionEntity,
-    @Relation(parentColumn = "id", entityColumn = "sessionId")
-    val messages: List<ChatMessageEntity>,
+    @Relation(parentColumn = "id", entityColumn = "sessionId", entity = ChatMessageEntity::class)
+    val messages: List<ChatMessageWithCitations>,
 )

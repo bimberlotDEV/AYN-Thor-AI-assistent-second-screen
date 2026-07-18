@@ -75,11 +75,17 @@ class GameSideDatabaseTest {
         dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
         val chatDao = database.chatDao()
         chatDao.insertSession(ChatSessionEntity("session", profile.id, profile.title, 2L, 2L))
-        chatDao.insertMessage(ChatMessageEntity("user", "session", "USER", "Question", 3L))
-        chatDao.insertMessage(ChatMessageEntity("assistant", "session", "ASSISTANT", "Answer", 4L))
+        chatDao.insertMessage(ChatMessageWithCitations(ChatMessageEntity("user", "session", "USER", "Question", 3L), emptyList()))
+        chatDao.insertMessage(
+            ChatMessageWithCitations(
+                ChatMessageEntity("assistant", "session", "ASSISTANT", "Answer", 4L),
+                listOf(SourceCitationEntity("assistant", 0, "Guide", "Wikipedia", "https://example.org", "Excerpt", 4L)),
+            ),
+        )
 
         val thread = chatDao.observeLatestThread(profile.id).first()
-        assertEquals(listOf("Question", "Answer"), thread?.messages?.sortedBy { it.createdAtEpochMillis }?.map { it.content })
+        assertEquals(listOf("Question", "Answer"), thread?.messages?.sortedBy { it.message.createdAtEpochMillis }?.map { it.message.content })
+        assertEquals("Guide", thread?.messages?.last()?.citations?.single()?.title)
 
         dao.delete(profile.id)
         assertEquals(null, chatDao.observeLatestThread(profile.id).first())

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -127,8 +129,20 @@ private fun ChatScreen(
                         }
                     }
                     items(messages, key = ChatMessage::id) { MessageCard(it) }
+                    if (state.isSearchingSources) {
+                        item("sources-loading") {
+                            Row(
+                                Modifier.fillMaxWidth().padding(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator(Modifier.height(20.dp), strokeWidth = 2.dp)
+                                Text("Searching sources…", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
                     if (state.streamingAnswer.isNotEmpty()) {
-                        item("streaming") { AssistantCard(state.streamingAnswer, isStreaming = true) }
+                        item("streaming") { AssistantCard(state.streamingAnswer, state.streamingCitations, isStreaming = true) }
                     }
                 }
                 Row(
@@ -160,7 +174,7 @@ private fun ChatScreen(
 
 @Composable
 private fun MessageCard(message: ChatMessage) {
-    if (message.role == ChatRole.ASSISTANT) AssistantCard(message.content, false)
+    if (message.role == ChatRole.ASSISTANT) AssistantCard(message.content, message.citations, false)
     else Card(
         modifier = Modifier.fillMaxWidth().padding(start = 42.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -168,7 +182,8 @@ private fun MessageCard(message: ChatMessage) {
 }
 
 @Composable
-private fun AssistantCard(text: String, isStreaming: Boolean) {
+private fun AssistantCard(text: String, citations: List<com.gameside.domain.knowledge.SourceCitation>, isStreaming: Boolean) {
+    val uriHandler = LocalUriHandler.current
     Card(
         modifier = Modifier.fillMaxWidth().padding(end = 20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -183,6 +198,19 @@ private fun AssistantCard(text: String, isStreaming: Boolean) {
             }
             Spacer(Modifier.height(6.dp))
             Text(text)
+            if (citations.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Text("Sources", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                citations.forEachIndexed { index, citation ->
+                    Button(
+                        onClick = { runCatching { uriHandler.openUri(citation.url) } },
+                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    ) {
+                        Text("[${index + 1}] ${citation.title}", modifier = Modifier.weight(1f))
+                        Icon(Icons.AutoMirrored.Rounded.OpenInNew, contentDescription = "Open source")
+                    }
+                }
+            }
         }
     }
 }

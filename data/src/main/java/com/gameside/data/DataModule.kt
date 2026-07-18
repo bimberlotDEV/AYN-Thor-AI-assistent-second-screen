@@ -10,9 +10,12 @@ import com.gameside.data.database.ChatDao
 import com.gameside.data.database.GameProfileDao
 import com.gameside.data.database.GameSideDatabase
 import com.gameside.data.game.RoomGameProfileRepository
+import com.gameside.data.knowledge.WikipediaKnowledgeProvider
 import com.gameside.data.security.KeystoreCredentialStore
 import com.gameside.data.settings.DataStoreSettingsRepository
 import com.gameside.domain.game.GameProfileRepository
+import com.gameside.domain.knowledge.GameKnowledgeProvider
+import com.gameside.domain.knowledge.KnowledgeRetriever
 import com.gameside.domain.ai.TextAiProvider
 import com.gameside.domain.chat.ChatRepository
 import com.gameside.domain.security.CredentialStore
@@ -33,6 +36,7 @@ abstract class DataBindingsModule {
     @Binds @Singleton abstract fun bindCredentialStore(value: KeystoreCredentialStore): CredentialStore
     @Binds @Singleton abstract fun bindChatRepository(value: RoomChatRepository): ChatRepository
     @Binds @Singleton abstract fun bindTextAiProvider(value: DeepSeekTextAiProvider): TextAiProvider
+    @Binds @Singleton abstract fun bindKnowledgeProvider(value: WikipediaKnowledgeProvider): GameKnowledgeProvider
 }
 
 @Module
@@ -42,7 +46,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): GameSideDatabase =
         Room.databaseBuilder(context, GameSideDatabase::class.java, "gameside.db")
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
 
@@ -51,6 +55,10 @@ object DatabaseModule {
 
     @Provides
     fun provideChatDao(database: GameSideDatabase): ChatDao = database.chatDao()
+
+    @Provides
+    @Singleton
+    fun provideKnowledgeRetriever(provider: GameKnowledgeProvider): KnowledgeRetriever = KnowledgeRetriever(provider)
 
     private val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
@@ -62,6 +70,15 @@ object DatabaseModule {
                 """CREATE TABLE IF NOT EXISTS `chat_messages` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `role` TEXT NOT NULL, `content` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `chat_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""",
             )
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_chat_messages_sessionId` ON `chat_messages` (`sessionId`)")
+        }
+    }
+
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS `source_citations` (`messageId` TEXT NOT NULL, `position` INTEGER NOT NULL, `title` TEXT NOT NULL, `sourceName` TEXT NOT NULL, `url` TEXT NOT NULL, `excerpt` TEXT NOT NULL, `retrievedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`messageId`, `position`), FOREIGN KEY(`messageId`) REFERENCES `chat_messages`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_source_citations_messageId` ON `source_citations` (`messageId`)")
         }
     }
 }

@@ -44,7 +44,15 @@ Chat slice validation:
 - The provider screen exposed masked credential entry, encrypted storage action, current DeepSeek V4 model selection, and connection testing.
 - Three on-device instrumentation tests passed: game relations/cascade, chat ordering/cascade, and Keystore credential round-trip/removal.
 - JVM prompt tests, debug assembly, and Android lint passed.
-- A real paid provider request remains intentionally pending until the key is entered directly in the on-device secure field; secrets are not transferred through ADB command logs.
+- The user entered the credential directly in the secure on-device field and confirmed a real streamed DeepSeek answer.
+
+Knowledge/citation slice validation:
+
+- The existing Huawei database migrated from schema 2 to schema 3 without losing the active game, prior chat, or Keystore-backed credential.
+- A live question, `When was Elden Ring released?`, retrieved Wikipedia evidence, generated the correct answer, included an inline citation, and rendered persistent clickable source buttons.
+- Retrieval falls back without citations when no question-specific match exists; weak results are filtered rather than shown as evidence.
+- Unit tests cover evidence ranking and numbered prompt context. All JVM tests, debug lint, APK assembly, and three Huawei instrumentation tests passed.
+- No `AndroidRuntime` or Room errors were recorded after the schema migration, install, launch, source retrieval, generation, or citation rendering.
 
 Not yet validated:
 

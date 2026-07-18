@@ -18,9 +18,10 @@ The repository now contains the validated display proof of concept plus the firs
 - a searchable manual game library with add, edit, delete, pin, active-game, platform, package, and spoiler controls;
 - Room persistence with an exported version-1 schema;
 - DataStore app settings and Android Keystore-backed encrypted credential storage contracts.
-- per-game DeepSeek V4 chat with streaming output, cancellation, local history, model selection, and spoiler-aware prompts.
+- per-game DeepSeek V4 chat with streaming output, cancellation, local history, model selection, and spoiler-aware prompts;
+- a provider-neutral knowledge contract plus conservative Wikipedia search, retrieval, ranking, and persisted clickable citations.
 
-The first real AI chat is now implemented. Source-backed wiki retrieval, citations, notes, bookmarks, and checklists are the next product slices; the app does not pretend that general model knowledge is sourced.
+The first sourced AI-chat slice is now implemented. If no sufficiently relevant Wikipedia evidence is found, the app deliberately falls back to clearly unsourced general model knowledge. Broader game-wiki providers, notes, bookmarks, and checklists are the next product slices.
 
 ## Build
 
@@ -48,7 +49,7 @@ The application ID defaults to `com.gameside.ai`. Override it without editing so
 
 ## Privacy at this milestone
 
-The app requests no sensitive permissions, performs no analytics, records no audio or screen content, and currently has no network permission. Profiles and settings remain local. The credential store is ready for later user-supplied provider keys and encrypts values with an Android Keystore AES/GCM key; no API key is bundled or currently requested. Game lookup remains limited to launcher activities and explicitly entered packages.
+The app requests internet access but no sensitive Android permissions. It performs no analytics and records no audio or screen content. Profiles, settings, chat history, and citations remain local. User-supplied API credentials are encrypted with an Android Keystore AES/GCM key; no API key is bundled. A submitted question may be sent to Wikipedia for evidence retrieval and to the configured DeepSeek provider for generation. Game lookup remains limited to launcher activities and explicitly entered packages.
 
 See [device testing](docs/device-testing.md) for the Huawei P30 Lite, simulated displays, and AYN Thor acceptance procedure.
 

@@ -2,7 +2,7 @@
 
 ## Goal of the current slice
 
-The current release combines the validated Android multi-display boundary with a tested local-first persistence foundation. It intentionally contains no pretend chat or wiki behavior.
+The current release combines the validated Android multi-display boundary with local-first profiles, real DeepSeek chat, and the first conservative source-backed retrieval path.
 
 ## Modules
 
@@ -33,6 +33,16 @@ Hilt connects device and data implementations to their domain contracts at the a
 6. Completed user and assistant messages are persisted in Room. Partial output is deliberately not saved after cancellation.
 7. Provider errors are mapped to actionable messages without exposing response bodies, credentials, prompts, or stack traces.
 
+## Knowledge retrieval flow
+
+1. `GameKnowledgeProvider` separates search and document retrieval from the chat and AI vendors.
+2. `WikipediaKnowledgeProvider` searches the public MediaWiki API using the active game and question, then retrieves short plaintext extracts over HTTPS.
+3. `KnowledgeRetriever` fetches candidate documents concurrently, rejects documents without question-specific term overlap, ranks the remainder, and keeps only results close to the best score.
+4. Numbered evidence is added to the system prompt. The model may cite only those numbers and must disclose when it falls back to general knowledge.
+5. The exact source metadata and short excerpt used for an answer are stored with that assistant message in Room schema 3.
+6. Source buttons remain available in local chat history and open the original HTTPS page.
+7. Retrieval failures never block chat; they produce an explicitly unsourced model-knowledge request instead of fabricated citations.
+
 ## Display flow
 
 1. `AndroidDisplayRepository` observes `DisplayManager` and emits immutable capability snapshots.
@@ -50,10 +60,10 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 - Cloud backup is disabled; future personal export will be explicit.
 - No sensitive Android permission is requested.
 - Game discovery is limited to launcher activities and explicit package names; `QUERY_ALL_PACKAGES` is not used.
-- Cleartext networking is disabled even though this milestone has no internet permission.
-- No prompts, provider credentials, screenshots, notes, or analytics are collected in this milestone.
+- Cleartext networking is disabled. DeepSeek and Wikipedia traffic uses HTTPS.
+- No provider credentials, screenshots, notes, or analytics are collected. The submitted question and compact recent context leave the device only for the requested answer.
 - Android backup remains disabled, so local profiles, settings, and future encrypted values are not copied to cloud backup.
 
 ## Next architecture increment
 
-Add provider-neutral chat and MediaWiki domain interfaces, then implement an explicitly configured OpenAI-compatible provider and sourced retrieval. Provider calls remain disabled until the user supplies credentials and submits a request.
+Add richer configurable game-wiki providers and the personal-tools slice: bookmarks, notes, and offline checklists. Wikipedia is intentionally treated as a safe baseline, not as a complete walkthrough database.
