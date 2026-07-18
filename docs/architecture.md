@@ -25,6 +25,7 @@ Hilt connects device and data implementations to their domain contracts at the a
 6. Saved answers, notes, checklists, and checklist items are stored under the active game in Room schema 4 and cascade when that game is deleted.
 7. Saved-answer citations are encoded as structured JSON inside the saved record so the bookmark remains independent if chat history is cleared.
 8. Retrieved wiki documents are stored per game in Room schema 5. Cached documents expire for network retrieval after seven days, remain visible offline, and cascade when their game is deleted.
+9. `PrivacyRepository` combines Room counts with encrypted-credential presence and owns selective deletion. Full reset clears Room, encrypted preferences and their Android Keystore key, then DataStore so onboarding restarts.
 
 ## AI chat flow
 
@@ -69,7 +70,8 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 - Cleartext networking is disabled. DeepSeek and game-wiki traffic uses HTTPS.
 - No provider credentials, screenshots, notes, or analytics are collected. The submitted question and compact recent context leave the device only for the requested answer.
 - Android backup remains disabled, so local profiles, settings, and future encrypted values are not copied to cloud backup.
+- Every destructive privacy action requires explicit confirmation; category deletion preserves unrelated data.
 
 ## Next architecture increment
 
-Add privacy/export/reset controls, explicit source diagnostics, and richer conversation management.
+Add explicit JSON export/import without credentials, source diagnostics, and richer conversation management.

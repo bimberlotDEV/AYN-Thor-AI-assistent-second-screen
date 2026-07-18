@@ -25,4 +25,5 @@ abstract class GameSideDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun personalToolsDao(): PersonalToolsDao
     abstract fun knowledgeCacheDao(): KnowledgeCacheDao
+    abstract fun privacyDao(): PrivacyDao
 }

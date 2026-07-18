@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.gameside.device.CompanionLaunchResult
 import com.gameside.features.display.DisplayDashboardRoute
 import com.gameside.features.settings.ProviderSettingsRoute
+import com.gameside.features.privacy.PrivacyRoute
 
 @Composable
 fun MoreRoute(
@@ -31,11 +32,14 @@ fun MoreRoute(
             Row(Modifier.fillMaxWidth().padding(12.dp)) {
                 if (section == 0) Button(onClick = {}, Modifier.weight(1f)) { Text("Displays") }
                 else OutlinedButton(onClick = { section = 0 }, Modifier.weight(1f)) { Text("Displays") }
-                if (section == 1) Button(onClick = {}, Modifier.weight(1f)) { Text("Settings") }
-                else OutlinedButton(onClick = { section = 1 }, Modifier.weight(1f)) { Text("Settings") }
+                if (section == 1) Button(onClick = {}, Modifier.weight(1f)) { Text("AI") }
+                else OutlinedButton(onClick = { section = 1 }, Modifier.weight(1f)) { Text("AI") }
+                if (section == 2) Button(onClick = {}, Modifier.weight(1f)) { Text("Privacy") }
+                else OutlinedButton(onClick = { section = 2 }, Modifier.weight(1f)) { Text("Privacy") }
             }
             if (section == 0) DisplayDashboardRoute(onLaunchCompanion, onOpenSingleScreen, Modifier.weight(1f))
-            else ProviderSettingsRoute(Modifier.weight(1f))
+            else if (section == 1) ProviderSettingsRoute(Modifier.weight(1f))
+            else PrivacyRoute(Modifier.weight(1f))
         }
     }
 }

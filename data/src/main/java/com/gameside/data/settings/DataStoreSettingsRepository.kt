@@ -66,6 +66,10 @@ class DataStoreSettingsRepository @Inject constructor(
         context.gameSideDataStore.edit { it[Keys.maxAnswerTokens] = tokens }
     }
 
+    override suspend fun clearAll() {
+        context.gameSideDataStore.edit { it.clear() }
+    }
+
     private companion object {
         val SUPPORTED_MODELS = setOf("deepseek-v4-flash", "deepseek-v4-pro")
     }

@@ -56,6 +56,11 @@ class KeystoreCredentialStore @Inject constructor(
         preferences.contains(identifier)
     }
 
+    override suspend fun clearAll() = withContext(Dispatchers.IO) {
+        check(preferences.edit().clear().commit()) { "Credential removal failed" }
+        if (keyStore.containsAlias(KEY_ALIAS)) keyStore.deleteEntry(KEY_ALIAS)
+    }
+
     private fun requireValidIdentifier(identifier: String) {
         require(identifier.matches(IDENTIFIER_PATTERN)) { "Invalid credential identifier" }
     }

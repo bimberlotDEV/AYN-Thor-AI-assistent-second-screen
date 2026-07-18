@@ -78,6 +78,14 @@ Offline game-wiki validation:
 - The Wiki destination reported current connectivity, exposed a clear-cache control, and rendered without `AndroidRuntime`, Room, SQLite, or migration errors.
 - JVM tests (including strict spoiler evidence limits), debug lint, and debug APK assembly passed with Room schema 5.
 
+Privacy controls validation:
+
+- The Huawei Privacy screen correctly reported the existing local game, conversation, saved answer, Wiki cache, and encrypted DeepSeek-key status.
+- Every selective deletion and the full reset are guarded by a destructive-action confirmation dialog. The conversation confirmation was opened and cancelled on-device, preserving the user's data.
+- Six Huawei instrumentation tests pass. The new privacy test verifies per-category counts and confirms that chat, personal tools, and cache can be cleared independently without deleting the game profile.
+- Full JVM tests, debug lint, debug APK assembly, install-over-existing-data, navigation, and dialog cancellation passed without `AndroidRuntime` or SQLite errors.
+- The complete reset implementation clears all Room tables, encrypted credential preferences, the app's Android Keystore key, and DataStore preferences; it is intentionally not executed against the user's live test data.
+
 Not yet validated:
 
 - Physical secondary-display touch; the Android overlay correctly reports no touch.

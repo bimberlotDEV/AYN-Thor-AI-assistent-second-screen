@@ -10,4 +10,5 @@ interface SettingsRepository {
     suspend fun setReducedMotion(enabled: Boolean)
     suspend fun setAiModel(model: String)
     suspend fun setMaxAnswerTokens(tokens: Int)
+    suspend fun clearAll()
 }

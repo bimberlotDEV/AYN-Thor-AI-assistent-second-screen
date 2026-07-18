@@ -139,4 +139,39 @@ class GameSideDatabaseTest {
         dao.delete(profile.id)
         assertEquals(0, cache.observe(profile.id).first().size)
     }
+
+    @Test
+    fun privacyControlsClearCategoriesWithoutDeletingGame() = runBlocking {
+        val profile = GameProfileEntity(
+            id = "privacy-game", title = "Privacy Game", platform = "OTHER", coverImageUri = null,
+            spoilerLevel = "NONE", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
+        database.chatDao().insertSession(ChatSessionEntity("privacy-session", profile.id, profile.title, 2L, 2L))
+        database.personalToolsDao().upsertSavedAnswer(SavedAnswerEntity("privacy-answer", profile.id, "privacy-message", "Q", "A", "[]", 2L))
+        database.personalToolsDao().upsertNote(GameNoteEntity("privacy-note", profile.id, "Title", "Text", 2L, 2L))
+        database.personalToolsDao().upsertChecklist(GameChecklistEntity("privacy-list", profile.id, "List", 2L, 2L), emptyList())
+        database.knowledgeCacheDao().upsert(KnowledgeCacheEntity(profile.id, "https://game.wiki/api.php", "1", "Page", "Wiki", "https://game.wiki/page", "Text", 2L))
+        val privacy = database.privacyDao()
+
+        assertEquals(1, privacy.gameCount().first())
+        assertEquals(1, privacy.conversationCount().first())
+        assertEquals(1, privacy.savedAnswerCount().first())
+        assertEquals(1, privacy.noteCount().first())
+        assertEquals(1, privacy.checklistCount().first())
+        assertEquals(1, privacy.wikiPageCount().first())
+
+        privacy.clearConversations()
+        privacy.clearPersonalTools()
+        privacy.clearWikiCache()
+
+        assertEquals(1, privacy.gameCount().first())
+        assertEquals(0, privacy.conversationCount().first())
+        assertEquals(0, privacy.savedAnswerCount().first())
+        assertEquals(0, privacy.noteCount().first())
+        assertEquals(0, privacy.checklistCount().first())
+        assertEquals(0, privacy.wikiPageCount().first())
+    }
 }

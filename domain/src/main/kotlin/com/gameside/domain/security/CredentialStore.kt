@@ -5,4 +5,5 @@ interface CredentialStore {
     suspend fun get(identifier: String): String?
     suspend fun remove(identifier: String)
     suspend fun contains(identifier: String): Boolean
+    suspend fun clearAll()
 }

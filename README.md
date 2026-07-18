@@ -22,6 +22,7 @@ The repository now contains the validated display proof of concept plus the firs
 - a provider-neutral knowledge contract plus automatic game-wiki detection, retrieval, ranking, and persisted clickable citations.
 - offline saved answers, personal notes, and checklists scoped to the active game;
 - a dedicated per-game Wiki browser with search, clickable sources, a seven-day local document cache, offline status, cache clearing, and spoiler-aware previews.
+- a local-data privacy dashboard with category counts, confirmed selective deletion, encrypted-key removal, and a full on-device reset.
 
 The sourced AI-chat slice supports MediaWiki-powered game sites such as wiki.gg and Fandom. A profile can override automatic discovery with its own HTTPS game-wiki URL. If no sufficiently relevant evidence is found, the app deliberately falls back to clearly unsourced general model knowledge. Assistant answers can be saved with their question and citations; notes, checklists, and previously downloaded wiki pages remain usable without a network connection. Strict spoiler modes hide cached article previews until the source is intentionally opened.
 
@@ -51,7 +52,7 @@ The application ID defaults to `com.gameside.ai`. Override it without editing so
 
 ## Privacy at this milestone
 
-The app requests internet access but no sensitive Android permissions. It performs no analytics and records no audio or screen content. Profiles, settings, chat history, citations, and cached wiki documents remain local. User-supplied API credentials are encrypted with an Android Keystore AES/GCM key; no API key is bundled. A submitted question may be sent to the detected or configured game wiki for evidence retrieval and to the configured DeepSeek provider for generation. Game lookup remains limited to launcher activities and explicitly entered packages.
+The app requests internet access but no sensitive Android permissions. It performs no analytics and records no audio or screen content. Profiles, settings, chat history, citations, and cached wiki documents remain local. User-supplied API credentials are encrypted with an Android Keystore AES/GCM key; no API key is bundled. The Privacy screen shows local record counts and supports confirmed deletion by category, credential removal, or a complete reset. A submitted question may be sent to the detected or configured game wiki for evidence retrieval and to the configured DeepSeek provider for generation. Game lookup remains limited to launcher activities and explicitly entered packages.
 
 See [device testing](docs/device-testing.md) for the Huawei P30 Lite, simulated displays, and AYN Thor acceptance procedure.
 
