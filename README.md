@@ -6,7 +6,7 @@ GameSide AI is a private, native Android gaming companion designed to remain usa
 
 For personal AYN Thor testing, download the current test-signed MVP directly from the repository:
 
-**[Download GameSide AI 1.0.0 MVP APK](https://raw.githubusercontent.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/main/downloads/GameSideAI-1.0.0-mvp-test.apk)**
+**[Download GameSide AI 1.0.0 MVP APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.0.0-mvp-test.apk)**
 
 SHA-256: `FD4215F2AA6B98D8BF5B409E58BE7E76A78CC7985A59DA34E91A29B8D211EF6E`
 
