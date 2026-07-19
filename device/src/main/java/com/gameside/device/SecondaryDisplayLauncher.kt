@@ -2,8 +2,6 @@ package com.gameside.device
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.app.ActivityManager
-import android.content.Context
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.hardware.display.DisplayManager
@@ -16,7 +14,21 @@ sealed interface CompanionLaunchResult {
     data class Failure(val reason: String) : CompanionLaunchResult
 }
 
+internal object LowerScreenLaunchPolicy {
+    fun targetDisplay(currentDisplayId: Int, availableDisplayIds: Collection<Int>): Int? {
+        if (currentDisplayId != Display.DEFAULT_DISPLAY) return null
+        return availableDisplayIds.firstOrNull { it != Display.DEFAULT_DISPLAY }
+    }
+}
+
 class SecondaryDisplayLauncher @Inject constructor() {
+    fun lowerDisplayFor(activity: Activity): Int? {
+        return LowerScreenLaunchPolicy.targetDisplay(
+            currentDisplayId(activity),
+            activity.getSystemService(DisplayManager::class.java).displays.map { it.displayId },
+        )
+    }
+
     fun launch(activity: Activity, intent: Intent, displayId: Int?): CompanionLaunchResult {
         val target = displayId ?: currentDisplayId(activity)
         addCompanionFlags(intent)
@@ -34,31 +46,6 @@ class SecondaryDisplayLauncher @Inject constructor() {
             CompanionLaunchResult.Failure("Companion activity is unavailable")
         } catch (error: IllegalArgumentException) {
             CompanionLaunchResult.Failure("Display $target is no longer available")
-        }
-    }
-
-    fun restore(context: Context, intent: Intent, displayId: Int): CompanionRestoreResult {
-        val display = context.getSystemService(DisplayManager::class.java).getDisplay(displayId)
-            ?: return CompanionRestoreResult.Failed("Display $displayId is no longer available")
-        if (displayId == Display.DEFAULT_DISPLAY) return CompanionRestoreResult.Failed("Automatic restore requires a secondary display")
-        addCompanionFlags(intent)
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val allowed = context.getSystemService(ActivityManager::class.java)
-                    .isActivityStartAllowedOnDisplay(context, display.displayId, intent)
-                if (!allowed) return CompanionRestoreResult.Failed("Android blocked activities on display $displayId")
-            }
-            val options = ActivityOptions.makeBasic().apply { launchDisplayId = displayId }
-            context.startActivity(intent, options.toBundle())
-            CompanionRestoreResult.Requested(displayId)
-        } catch (error: SecurityException) {
-            CompanionRestoreResult.Failed("SecurityException while restoring on display $displayId")
-        } catch (error: ActivityNotFoundException) {
-            CompanionRestoreResult.Failed("Companion activity is unavailable")
-        } catch (error: IllegalArgumentException) {
-            CompanionRestoreResult.Failed("Display $displayId rejected the companion activity")
-        } catch (error: IllegalStateException) {
-            CompanionRestoreResult.Failed("Android could not restore the companion task")
         }
     }
 

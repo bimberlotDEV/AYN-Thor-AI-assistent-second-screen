@@ -160,7 +160,30 @@ Completed locally:
 - APK metadata reports version `1.1.1-companion-hotfix`, version code 3, minSdk 26, and targetSdk 36. APK Signature Scheme v2 verification passed with the existing Android test certificate.
 - Published APK size: 1,673,555 bytes. SHA-256: `B0C99BE77F6948D3EAA8BCD9EADBB1E56C4657D632700D5635ED328A0E34EB95`.
 
-Still required:
+Status after physical feedback:
 
 - No Android device was available to ADB during this build, so the compiled Room/Keystore instrumentation suite was not rerun.
-- The physical Thor must run the three-game, two-second restore, no-game-migration, Home/Recents, sleep/wake, display reconnect, and explicit-stop acceptance matrix before the hardware bug can be marked closed.
+- The physical Thor feedback showed that automatic restore did not keep GameSide below while a game ran above. This acceptance path was superseded by the simpler `1.1.2-lower-screen` behavior below.
+
+## Automatic lower-screen build 1.1.2 — 2026-07-19
+
+User decision and hardware result:
+
+- The `1.1.1` restore loop did not keep GameSide below while a game ran above on the physical Thor.
+- The reverse layout, GameSide above with a game below, remained stable.
+- On user request, the companion-session feature and background restore behavior were removed rather than expanded with more permissions or a foreground service.
+
+Completed locally:
+
+- Every launcher start on display 0 now selects the available non-primary display, starts the complete GameSide interface there, and finishes the temporary upper activity.
+- A launch already occurring on a secondary display stays there and does not create another redirect. A single-display device remains on its current display.
+- More > Displays no longer exposes launch, restore, stop, keep-active, or diagnostics controls; it reports the automatic target and retains controller-shortcut configuration.
+- The long Menu shortcut directly targets the current secondary display and does not read accessibility window content.
+- Unit tests cover primary-to-lower redirect, already-lower behavior, and single-screen fallback.
+- JVM tests, Android lint, debug assembly, the Room/Keystore instrumentation APK compile, minified R8 release, and minified signed beta release all passed when run in memory-safe separated Gradle jobs.
+- APK metadata: `1.1.2-lower-screen`, version code 4, minSdk 26, targetSdk 36. Published size: 1,646,971 bytes.
+- Published SHA-256: `8AFDC3C0AF3D428CA6706CEFF938E05D778D42636624891657BEA7CCC3ADFF11`.
+
+Open hardware limitation:
+
+- Thor firmware still closes GameSide below when an upper-screen game takes over. This release makes reopening GameSide below automatic and predictable but does not claim simultaneous coexistence in that orientation.

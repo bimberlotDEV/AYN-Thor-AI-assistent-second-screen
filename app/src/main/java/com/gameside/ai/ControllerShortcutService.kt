@@ -1,6 +1,8 @@
 package com.gameside.ai
 
 import android.accessibilityservice.AccessibilityService
+import android.app.ActivityOptions
+import android.content.Intent
 import android.view.Display
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -16,22 +18,16 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.gameside.device.ControllerShortcutPolicy
-import com.gameside.device.CompanionRestoreTrigger
-import com.gameside.device.CompanionSessionCoordinator
-import com.gameside.device.PrimaryWindowChanged
-import android.os.Build
 import android.hardware.display.DisplayManager
 
 @AndroidEntryPoint
 class ControllerShortcutService : AccessibilityService() {
     @Inject lateinit var settingsRepository: SettingsRepository
-    @Inject lateinit var sessionCoordinator: CompanionSessionCoordinator
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     @Volatile private var settings = AppSettings()
 
     override fun onServiceConnected() {
         serviceScope.launch { settingsRepository.settings.collectLatest { settings = it } }
-        sessionCoordinator.accessibilityConnected()
     }
 
     override fun onKeyEvent(event: KeyEvent): Boolean {
@@ -55,17 +51,16 @@ class ControllerShortcutService : AccessibilityService() {
     private fun launchCompanion() {
         val secondary = getSystemService(DisplayManager::class.java).displays.firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
         if (secondary != null) {
-            if (!sessionCoordinator.state.value.sessionActive) sessionCoordinator.startSession(secondary.displayId)
-            sessionCoordinator.requestRestore(CompanionRestoreTrigger.ControllerShortcut)
+            val intent = Intent(this, CompanionActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            )
+            runCatching {
+                startActivity(intent, ActivityOptions.makeBasic().apply { launchDisplayId = secondary.displayId }.toBundle())
+            }
         }
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        val packageName = event.packageName?.toString()?.takeIf(String::isNotBlank) ?: return
-        val displayId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) event.displayId else Display.DEFAULT_DISPLAY
-        sessionCoordinator.primaryWindowChanged(PrimaryWindowChanged(packageName, displayId, event.eventTime))
-    }
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
     override fun onInterrupt() = Unit
     override fun onDestroy() { serviceScope.cancel(); super.onDestroy() }
 

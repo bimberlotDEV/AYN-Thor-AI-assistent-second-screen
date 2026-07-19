@@ -1,7 +1,6 @@
 package com.gameside.ai
 
 import com.gameside.device.AndroidDisplayRepository
-import com.gameside.device.CompanionRestorer
 import com.gameside.domain.display.DisplayRepository
 import dagger.Binds
 import dagger.Module
@@ -15,8 +14,4 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindDisplayRepository(implementation: AndroidDisplayRepository): DisplayRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindCompanionRestorer(implementation: AndroidCompanionRestorer): CompanionRestorer
 }

@@ -20,8 +20,8 @@ android {
         applicationId = providers.gradleProperty("GAME_SIDE_APPLICATION_ID").get()
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1.1-companion-hotfix"
+        versionCode = 4
+        versionName = "1.1.2-lower-screen"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -71,9 +71,6 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
     implementation("com.google.dagger:hilt-android:2.57.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
-    androidTestImplementation("androidx.test:core-ktx:1.6.1")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")
-    androidTestImplementation("androidx.test:runner:1.6.2")
 }
 
 kapt { correctErrorTypes = true }

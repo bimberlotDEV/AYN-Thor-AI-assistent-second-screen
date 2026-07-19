@@ -2,7 +2,7 @@
 
 ## Install the currently published test APK
 
-The direct-download APK in `downloads/` is the minified `1.1.1-companion-hotfix` test release. It is signed with the same local Android test/debug certificate as the previous private build so compatible test installations can be updated in place; it is not a long-term production-signed release.
+The direct-download APK in `downloads/` is the minified `1.1.2-lower-screen` test release. It is signed with the same local Android test/debug certificate as the previous private build so compatible test installations can be updated in place; it is not a long-term production-signed release.
 
 To install that published build without a PC, follow the Dutch [user guide](gebruikershandleiding.md). To build and install a development APK from source, use:
 

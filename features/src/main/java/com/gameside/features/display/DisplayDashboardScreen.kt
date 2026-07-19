@@ -1,5 +1,7 @@
 package com.gameside.features.display
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,203 +12,98 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.OpenInNew
-import androidx.compose.material.icons.rounded.DeveloperBoard
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import android.content.Intent
-import android.provider.Settings
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.material3.Switch
-import com.gameside.device.CompanionLaunchResult
 import com.gameside.domain.display.DeviceDisplayInfo
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.ComponentName
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun DisplayDashboardRoute(
-    onLaunchCompanion: (Int) -> CompanionLaunchResult,
-    onOpenSingleScreen: () -> CompanionLaunchResult,
     modifier: Modifier = Modifier,
     viewModel: DisplayDashboardViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     DisplayDashboardScreen(
-        state, onLaunchCompanion, onOpenSingleScreen, viewModel::setShortcutEnabled,
-        viewModel::startCalibration, viewModel::setLongPressMillis,
-        viewModel::setKeepCompanionActive, viewModel::restoreCompanionNow,
-        viewModel::stopCompanionSession, viewModel::diagnosticsText, modifier,
+        state = state,
+        onShortcutEnabled = viewModel::setShortcutEnabled,
+        onCalibrate = viewModel::startCalibration,
+        onLongPressMillis = viewModel::setLongPressMillis,
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun DisplayDashboardScreen(
     state: DisplayDashboardState,
-    onLaunchCompanion: (Int) -> CompanionLaunchResult,
-    onOpenSingleScreen: () -> CompanionLaunchResult,
     onShortcutEnabled: (Boolean) -> Unit,
     onCalibrate: () -> Unit,
     onLongPressMillis: (Int) -> Unit,
-    onKeepCompanionActive: (Boolean) -> Unit,
-    onRestoreCompanion: () -> Unit,
-    onStopCompanion: () -> Unit,
-    diagnosticsText: () -> String,
     modifier: Modifier = Modifier,
 ) {
-    var launchMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var accessibilityEnabled by remember { mutableStateOf(isAccessibilityEnabled(context)) }
-    DisposableEffect(lifecycleOwner, context) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) accessibilityEnabled = isAccessibilityEnabled(context)
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-    fun describe(result: CompanionLaunchResult): String = when (result) {
-        is CompanionLaunchResult.Success -> "Companion launch requested on display ${result.displayId}"
-        is CompanionLaunchResult.Failure -> result.reason
-    }
     LazyColumn(
         modifier = modifier.fillMaxSize().padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-            item {
-                Spacer(Modifier.height(12.dp))
-                Text("GameSide AI", style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    "Dual-display readiness check",
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Choose a display for the companion. If Android exposes no eligible second display, open the same touch interface here.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                launchMessage?.let {
-                    Spacer(Modifier.height(8.dp))
-                    Text(it, color = MaterialTheme.colorScheme.secondary)
-                }
-            }
-            if (state.displays.isEmpty()) {
-                item { Text("Detecting displays…") }
-            }
-            items(state.displays, key = { it.id }) { display ->
-                DisplayCard(
-                    display = display,
-                    preferred = display.id == state.preferredDisplayId,
-                    onLaunch = { launchMessage = describe(onLaunchCompanion(display.id)) },
-                )
-            }
-            item {
-                OutlinedButton(onClick = { launchMessage = describe(onOpenSingleScreen()) }, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.AutoMirrored.Rounded.OpenInNew, contentDescription = null)
-                    Text("  Open single-screen companion")
-                }
-                Spacer(Modifier.height(20.dp))
-            }
-            item {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("Companion session", style = MaterialTheme.typography.titleLarge)
-                        Text("Status: ${state.companionStatus} · Accessibility: ${if (accessibilityEnabled) "ready" else "disabled"}")
-                        Text("Target display: ${state.targetDisplayId ?: "none"} · restore attempts: ${state.restoreAttempts}/3")
-                        state.companionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column(Modifier.weight(1f)) {
-                                Text("Keep companion active while gaming")
-                                Text(
-                                    if (accessibilityEnabled) "Restores GameSide on the lower display after a game opens above."
-                                    else "Enable Accessibility below for automatic restore; manual restore remains available.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                            Switch(
-                                checked = state.keepCompanionActive,
-                                onCheckedChange = onKeepCompanionActive,
-                                enabled = state.companionSessionActive,
-                            )
+        item {
+            Spacer(Modifier.height(12.dp))
+            Text("Display status", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "GameSide opens automatically on the lower display whenever Android exposes one. No manual display session is required.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (state.displays.isEmpty()) item { Text("Detecting displays…") }
+        items(state.displays, key = { it.id }) { display ->
+            DisplayCard(display, display.id == state.preferredDisplayId)
+        }
+        item {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Controller-first mode", style = MaterialTheme.typography.titleLarge)
+                    Text("D-pad/stick navigates · A confirms · B returns · L1/R1 changes tabs · X opens Quick · Y opens keyword mode.")
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Global long-press shortcut")
+                            Text("Opens GameSide on the lower display and never reads screen content.", style = MaterialTheme.typography.bodySmall)
                         }
-                        Button(onClick = onRestoreCompanion, modifier = Modifier.fillMaxWidth()) { Text("Restore companion now") }
-                        OutlinedButton(
-                            onClick = onStopCompanion,
-                            enabled = state.companionSessionActive,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Stop companion session") }
-                        OutlinedButton(
-                            onClick = {
-                                context.getSystemService(ClipboardManager::class.java)
-                                    .setPrimaryClip(ClipData.newPlainText("GameSide diagnostics", diagnosticsText()))
-                                launchMessage = "Privacy-safe diagnostics copied"
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Copy diagnostics") }
+                        Switch(checked = state.shortcutEnabled, onCheckedChange = onShortcutEnabled)
                     }
-                }
-                Spacer(Modifier.height(12.dp))
-            }
-            item {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("Controller-first mode", style = MaterialTheme.typography.titleLarge)
-                        Text("D-pad/stick navigates · A confirms · B returns · L1/R1 changes tabs · X opens Quick · Y opens keyword mode.")
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column(Modifier.weight(1f)) {
-                                Text("Global long-press shortcut")
-                                Text("Only observes controller keys; screen content is never read.", style = MaterialTheme.typography.bodySmall)
-                            }
-                            Switch(checked = state.shortcutEnabled, onCheckedChange = onShortcutEnabled)
-                        }
-                        OutlinedButton(
-                            onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Open Android Accessibility settings") }
-                        Button(onClick = onCalibrate, modifier = Modifier.fillMaxWidth()) {
-                            Text(if (state.calibrationPending) "Now hold the desired Menu button…" else "Calibrate Menu button")
-                        }
-                        Text("Current key code: ${state.shortcutKeyCode} · hold: ${state.longPressMillis} ms")
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(650, 800, 1_000).forEach { value ->
-                                OutlinedButton(onClick = { onLongPressMillis(value) }, enabled = state.longPressMillis != value) { Text("${value}ms") }
+                    OutlinedButton(
+                        onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Open Android Accessibility settings") }
+                    Button(onClick = onCalibrate, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (state.calibrationPending) "Now hold the desired Menu button…" else "Calibrate Menu button")
+                    }
+                    Text("Current key code: ${state.shortcutKeyCode} · hold: ${state.longPressMillis} ms")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(650, 800, 1_000).forEach { value ->
+                            OutlinedButton(onClick = { onLongPressMillis(value) }, enabled = state.longPressMillis != value) {
+                                Text("${value}ms")
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
             }
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
 
-private fun isAccessibilityEnabled(context: android.content.Context): Boolean {
-    val expected = ComponentName(context, "com.gameside.ai.ControllerShortcutService").flattenToString()
-    return Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-        .orEmpty().split(':').any { it.equals(expected, ignoreCase = true) }
-}
-
 @Composable
-private fun DisplayCard(display: DeviceDisplayInfo, preferred: Boolean, onLaunch: () -> Unit) {
+private fun DisplayCard(display: DeviceDisplayInfo, preferred: Boolean) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth(),
@@ -214,7 +111,7 @@ private fun DisplayCard(display: DeviceDisplayInfo, preferred: Boolean, onLaunch
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(display.name, style = MaterialTheme.typography.titleMedium)
-                if (preferred) Text("RECOMMENDED", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelSmall)
+                if (preferred) Text("AUTOMATIC TARGET", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelSmall)
             }
             Text(
                 "Display ${display.id} · ${display.widthPixels}×${display.heightPixels} · ${display.densityDpi} dpi · ${"%.1f".format(display.refreshRateHz)} Hz",
@@ -231,12 +128,6 @@ private fun DisplayCard(display: DeviceDisplayInfo, preferred: Boolean, onLaunch
                 color = if (display.canHostActivities) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
             )
-            if (!display.isDefault) {
-                Button(onClick = onLaunch, enabled = display.canHostActivities, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Rounded.DeveloperBoard, contentDescription = null)
-                    Text("  Launch companion here")
-                }
-            }
         }
     }
 }

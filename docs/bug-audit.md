@@ -2,7 +2,7 @@
 
 Auditdatum: 18 juli 2026
 
-Update 19 juli 2026: de fysieke AYN Thor meldde een hoge lifecyclebug waarbij iedere gamestart de onderste companion-task verwijderde. Versie `1.1.1-companion-hotfix` bevat het defensieve sessie-/herstelmechanisme en lokale diagnostiek. De code-, JVM-, lint- en buildcontroles zijn groen; de bug blijft **in acceptatietest** totdat de beschreven drie-game Thor-matrix slaagt.
+Update 19 juli 2026: de fysieke AYN Thor verwijdert bij iedere bovenste gamestart de onderste GameSide-activity. De defensieve `1.1.1`-herstelfunctie bleek dit niet betrouwbaar te kunnen omzeilen. Op gebruikersverzoek verwijdert `1.1.2-lower-screen` de companion-sessie volledig en start GameSide voortaan automatisch beneden. Gelijktijdig GameSide beneden plus game boven blijft een vastgelegde Thor-firmwarebeperking; de omgekeerde indeling werkt wel.
 
 Gecontroleerde codebasis: commit `47bd4bc` (`main`)
 

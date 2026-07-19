@@ -18,13 +18,11 @@ Edit the profile and enter the exact Android package name. Launch works only for
 
 ## The second display is missing
 
-Open **More > Displays** and inspect Android's reported displays. Reconnect or re-enable the lower display, then retry. Android simulated overlays validate activity placement but cannot validate physical touch. Use the single-screen companion fallback if no eligible display is exposed.
+Open **More > Displays** and inspect Android's reported displays. Reconnect or re-enable the lower display, then restart GameSide. Android simulated overlays validate activity placement but cannot validate physical touch. If no eligible display is exposed, GameSide stays on the current screen automatically.
 
-## The companion disappears when a game starts
+## GameSide disappears below when a game starts above
 
-Install version `1.1.1-companion-hotfix` or newer, launch the lower-screen companion, and enable **GameSide controller shortcut** in Android Accessibility. In **More > Displays**, confirm the session is active, **Keep companion active while gaming** is on, and a secondary target display is shown. Use **Restore companion now** if automatic restore is unavailable.
-
-Automatic restore waits 750 ms, has a five-second cooldown, and stops after three attempts per minute. If status becomes `failed`, use the long Menu shortcut or manual restore and select **Copy diagnostics**. The copied log is privacy-safe; never add an API-key or private chat manually.
+The physical Thor currently removes a lower-screen GameSide activity whenever a game starts above. Version `1.1.2-lower-screen` no longer runs an automatic restore loop: reopen GameSide through its icon or the optional long Menu shortcut and it will target the lower display automatically. The tested reverse arrangement, GameSide above with a game below, does remain active. This is recorded as a Thor firmware compatibility limitation rather than a game-specific bug.
 
 ## APK update is rejected
 

@@ -1,13 +1,13 @@
 # GameSide AI gebruikershandleiding
 
-Deze handleiding beschrijft de `1.1.1-companion-hotfix` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
+Deze handleiding beschrijft de `1.1.2-lower-screen` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
 
 ## 1. Downloaden en installeren op de AYN Thor
 
 1. Open Chrome op de Thor.
 2. Log in op GitHub met een account dat toegang heeft tot `bimberlotDEV/AYN-Thor-AI-assistent-second-screen`.
 3. Open de repository en ga naar `downloads`.
-4. Open `GameSideAI-1.1.1-companion-hotfix-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
+4. Open `GameSideAI-1.1.2-lower-screen-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
 5. Bevestig de downloadwaarschuwing uitsluitend als bestandsnaam en repository kloppen.
 6. Open het bestand via de downloadmelding of de app Bestanden.
 7. Android vraagt mogelijk toestemming om onbekende apps vanuit Chrome of Bestanden te installeren. Sta dit tijdelijk toe.
@@ -20,7 +20,7 @@ Wanneer Android meldt dat de app niet kan worden bijgewerkt, is de bestaande ins
 
 De onboarding legt uit:
 
-- dat GameSide AI een companion is en AI-antwoorden fouten kunnen bevatten;
+- dat GameSide AI een second-screen-assistent is en AI-antwoorden fouten kunnen bevatten;
 - dat je altijd zelf een actieve game kiest;
 - hoe spoilers per game worden beperkt;
 - welke vraag- en gamecontext naar DeepSeek en de game-Wiki gaat;
@@ -122,25 +122,15 @@ Alle data is aan de actieve game gekoppeld. Verwijder je het volledige gameprofi
 
 Open **More → Displays**.
 
-1. GameSide toont alle displays die Android rapporteert, inclusief resolutie, dichtheid, touch- en activity-capability.
-2. Een geschikte niet-primaire display wordt als **RECOMMENDED** gemarkeerd.
-3. Kies **Launch companion here** bij het onderste scherm.
-4. De volledige Ask/Wiki/Saved/Games/More-interface opent in een aparte activity/task op dat display.
-5. Als er geen tweede display is, gebruik je **Open single-screen companion**.
+1. Start GameSide normaal via het app-icoon.
+2. GameSide controleert welke displays Android rapporteert.
+3. Als een tweede display beschikbaar is, opent de volledige Ask/Wiki/Saved/Games/More-interface automatisch daar.
+4. Onder **More → Displays** wordt dit display als **AUTOMATIC TARGET** getoond.
+5. Als er geen tweede display is, blijft GameSide automatisch op het huidige scherm.
 
 Display-ID's kunnen na reboot of reconnect veranderen; de app selecteert op capabilities en gebruikt geen vast Thor-displaynummer.
 
-### Companion actief houden tijdens gamen
-
-1. Open **More → Displays** en schakel via de knop Android Accessibility in voor **GameSide controller shortcut**.
-2. Start de companion op het onderste display. Een nieuwe sessie zet **Keep companion active while gaming** standaard aan.
-3. Start een game op het bovenste scherm. Als Thor de onderste activity verwijdert, vraagt GameSide na 750 ms een gecontroleerd herstel op het actuele onderste display aan.
-4. Onder **Companion session** zie je Accessibility, sessiestatus, doel-display en herstelpogingen.
-5. Gebruik **Restore companion now** voor handmatig herstel. Na drie automatische pogingen per minuut stopt de lus; de lange Menu-shortcut blijft een handmatige fallback.
-6. Kies **Stop companion session** wanneer GameSide niet meer automatisch terug mag komen.
-7. Kies bij een fout **Copy diagnostics** en deel alleen die tekst. Het log bevat maximaal vijftig lifecycle-/displayevents en nooit vragen, API-keys, Wiki-inhoud of schermdata.
-
-Home of Recents opent GameSide niet geforceerd. Zonder Accessibility blijft de companion handmatig bruikbaar, maar is automatisch herstel na een gamestart niet beschikbaar.
+De huidige Thor-firmware sluit GameSide beneden wanneer een game boven start. De eerdere automatische herstelfunctie kon deze firmwarebeperking niet betrouwbaar omzeilen en is verwijderd. Je kunt GameSide daarna opnieuw via het app-icoon of de lange Menu-shortcut beneden openen. De omgekeerde indeling, GameSide boven en een game beneden, werkte tijdens de gebruikerstest wel.
 
 ### Globale lange Menu-shortcut
 
@@ -156,7 +146,7 @@ De Accessibility-service vraagt alleen controller-key filtering aan, leest geen 
 ## 10. Een Android-game op het primaire scherm starten
 
 1. Vul bij het gameprofiel de exacte package name van een geïnstalleerde Android-game in.
-2. Open **Games** op de companion.
+2. Open **Games** in GameSide op het onderste scherm.
 3. Tik op de startknop van die game.
 4. GameSide vraagt Android de launcheractivity expliciet op display 0 te openen.
 

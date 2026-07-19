@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.gameside.core.design.GameSideTheme
-import com.gameside.device.CompanionLaunchResult
 import com.gameside.device.SecondaryDisplayLauncher
 import com.gameside.device.GameLauncher
 import com.gameside.features.home.GameSideHomeRoute
@@ -16,7 +15,6 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import com.gameside.device.ControllerInputRouter
-import com.gameside.device.CompanionSessionCoordinator
 import android.annotation.SuppressLint
 
 @AndroidEntryPoint
@@ -25,16 +23,21 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var displayLauncher: SecondaryDisplayLauncher
     @Inject lateinit var gameLauncher: GameLauncher
     @Inject lateinit var controllerInput: ControllerInputRouter
-    @Inject lateinit var sessionCoordinator: CompanionSessionCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val lowerDisplayId = displayLauncher.lowerDisplayFor(this)
+        if (lowerDisplayId != null) {
+            val result = displayLauncher.launch(this, Intent(this, CompanionActivity::class.java), lowerDisplayId)
+            if (result is com.gameside.device.CompanionLaunchResult.Success) {
+                finish()
+                return
+            }
+        }
         enableEdgeToEdge()
         setContent {
             GameSideTheme {
                 GameSideHomeRoute(
-                    onLaunchCompanion = { displayId -> launchCompanion(displayId) },
-                    onOpenSingleScreen = { launchCompanion(null) },
                     onLaunchGame = { packageName -> gameLauncher.launchOnPrimary(this, packageName) },
                 )
             }
@@ -57,10 +60,4 @@ class MainActivity : ComponentActivity() {
 
     private fun KeyEvent.withKeyCode(keyCode: Int) = KeyEvent(downTime, eventTime, action, keyCode, repeatCount, metaState, deviceId, scanCode, flags, source)
 
-    private fun launchCompanion(displayId: Int?): CompanionLaunchResult {
-        val intent = Intent(this, CompanionActivity::class.java)
-        val result = displayLauncher.launch(this, intent, displayId)
-        if (result is CompanionLaunchResult.Success) sessionCoordinator.startSession(result.displayId)
-        return result
-    }
 }

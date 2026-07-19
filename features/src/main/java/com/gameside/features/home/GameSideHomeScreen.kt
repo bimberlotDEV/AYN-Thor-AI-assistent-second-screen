@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.gameside.device.CompanionLaunchResult
 import com.gameside.device.GameLaunchResult
 import com.gameside.features.chat.ChatRoute
 import com.gameside.features.game.GameLibraryRoute
@@ -39,8 +38,6 @@ import com.gameside.device.ControllerCommand
 
 @Composable
 fun GameSideHomeRoute(
-    onLaunchCompanion: (Int) -> CompanionLaunchResult,
-    onOpenSingleScreen: () -> CompanionLaunchResult,
     onLaunchGame: (String) -> GameLaunchResult,
     viewModel: HomeViewModel = viewModel(),
 ) {
@@ -52,14 +49,12 @@ fun GameSideHomeRoute(
             verticalArrangement = Arrangement.Center,
         ) { CircularProgressIndicator() }
         HomeState.Onboarding -> OnboardingScreen(onComplete = viewModel::completeOnboarding)
-        is HomeState.Content -> HomeContent(onLaunchCompanion, onOpenSingleScreen, onLaunchGame, viewModel)
+        is HomeState.Content -> HomeContent(onLaunchGame, viewModel)
     }
 }
 
 @Composable
 private fun HomeContent(
-    onLaunchCompanion: (Int) -> CompanionLaunchResult,
-    onOpenSingleScreen: () -> CompanionLaunchResult,
     onLaunchGame: (String) -> GameLaunchResult,
     viewModel: HomeViewModel,
 ) {
@@ -119,7 +114,7 @@ private fun HomeContent(
             1 -> WikiRoute(Modifier.padding(padding))
             2 -> PersonalToolsRoute(Modifier.padding(padding))
             3 -> GameLibraryRoute(onLaunchGame, Modifier.padding(padding))
-            else -> MoreRoute(onLaunchCompanion, onOpenSingleScreen, Modifier.padding(padding))
+            else -> MoreRoute(Modifier.padding(padding))
         }
     }
 }
