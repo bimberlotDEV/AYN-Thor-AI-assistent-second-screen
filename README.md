@@ -100,6 +100,12 @@ Voor uitleg per scherm, voorbeelden en probleemoplossing:
 
 ### [Open de volledige gebruikershandleiding](docs/gebruikershandleiding.md)
 
+## Roadmap
+
+Bekijk wat al gereed is, welke bugs eerst worden opgelost, hoe de fysieke AYN Thor-beta wordt gevalideerd en wat richting een stabiele privérelease gaat:
+
+### [Open de GameSide AI roadmap](docs/roadmap.md)
+
 ## Documentatie
 
 - [Volledige gebruikershandleiding](docs/gebruikershandleiding.md)
@@ -112,6 +118,7 @@ Voor uitleg per scherm, voorbeelden en probleemoplossing:
 - [Privé release en distributie](docs/release-and-distribution.md)
 - [Releasechecklist](docs/release-checklist.md)
 - [Bug-audit](docs/bug-audit.md)
+- [Roadmap](docs/roadmap.md)
 
 ## Ontwikkelaars
 
