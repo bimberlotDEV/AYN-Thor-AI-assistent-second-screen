@@ -122,4 +122,20 @@ Not yet validated:
 - Real AYN display disable/re-enable, lid, focus, and firmware behavior.
 - Launching a mapped game package on the primary display. Profile text entry now works through the existing keyboard, but no third-party game package was selected or launched during this run.
 
+## Controller-first 1.1.0 build — 2026-07-19
+
+Completed without a device:
+
+- Version `1.1.0-controller` / code 2 compiles as debug and minified R8 release.
+- JVM coverage passes for question composition, spoiler instructions, controller command mapping, repeated/non-controller filtering and long-press policy.
+- Room schema 6 is exported and the schema-5-to-6 migration test APK compiles; the migration adds per-game Quick Question favorites with a foreign-key cascade.
+- Android lint and `lintVitalRelease` pass with zero errors.
+- The 1.65 MB test-key-signed APK verifies with APK Signature Schemes v2 and v3 and contains no microphone or screenshot permission.
+- Repository APK SHA-256: `6C0263EF05C07A2924B31C637AF070CE990B9BF63A71A78A653B4C0ABAF12FBE`.
+
+Still required for the 1.1 hardware gate:
+
+- The Huawei was no longer listed by ADB on 2026-07-19, so the nine compiled Room/Keystore/migration instrumentation tests and install-over-existing-schema-5 check could not be rerun in this session.
+- AYN Thor controller key calibration, global long-press delivery, focus routing, lower-display launch and real-game coexistence remain physical-device acceptance tests.
+
 The Huawei results validate the standards-based display/activity implementation but do not replace the AYN Thor acceptance gate.

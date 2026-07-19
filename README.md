@@ -2,7 +2,7 @@
 
 GameSide AI is een privé Android gaming-assistent voor de AYN Thor en andere Android-apparaten. Je speelt op het hoofdscherm en gebruikt **Ask, Wiki, opgeslagen antwoorden, notities en checklists** op het tweede scherm. Op een gewone telefoon werkt dezelfde app in single-screenmodus.
 
-> Huidige versie: **1.0.0 MVP test-build**<br>
+> Huidige versie: **1.1.0 Controller test-build**<br>
 > Getest op: Huawei P30 Lite, Android 9 en Androids gesimuleerde tweede display<br>
 > Fysieke AYN Thor-validatie: nog uit te voeren
 
@@ -10,10 +10,10 @@ GameSide AI is een privé Android gaming-assistent voor de AYN Thor en andere An
 
 De repository is privé. Log daarom op de AYN Thor eerst in op GitHub met een account dat toegang heeft tot deze repository.
 
-### [Download GameSide AI 1.0.0 APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.0.0-mvp-test.apk)
+### [Download GameSide AI 1.1.0 Controller APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.1.0-controller-test.apk)
 
-Bestand: `GameSideAI-1.0.0-mvp-test.apk`<br>
-SHA-256: `FD4215F2AA6B98D8BF5B409E58BE7E76A78CC7985A59DA34E91A29B8D211EF6E`
+Bestand: `GameSideAI-1.1.0-controller-test.apk`<br>
+SHA-256: `6C0263EF05C07A2924B31C637AF070CE990B9BF63A71A78A653B4C0ABAF12FBE`
 
 Installeren zonder pc of USB:
 
@@ -44,11 +44,11 @@ Een API-key is nooit in de APK of repository opgenomen. Iedere gebruiker voert z
 
 | Onderdeel | Mogelijkheden |
 |---|---|
-| **Ask** | Gamegerichte vragen stellen, streaming antwoorden stoppen, bronnen openen, antwoorden kopiëren, opnieuw proberen, opslaan of omzetten naar een checklist. |
+| **Ask** | Gamegerichte vragen typen óf controller-first samenstellen, favorieten en vervolgvragen kiezen, streaming antwoorden stoppen, bronnen openen, antwoorden kopiëren, opnieuw proberen, opslaan of omzetten naar een checklist. |
 | **Wiki** | De Wiki van de actieve game doorzoeken, bronpagina's openen en eerder opgehaalde pagina's offline bekijken. |
 | **Saved** | Opgeslagen AI-antwoorden, persoonlijke notities en offline checklists beheren. |
 | **Games** | Games toevoegen, zoeken, activeren, pinnen, bewerken, verwijderen en optioneel een gemapte Android-game op het primaire scherm starten. |
-| **More → Displays** | Beschikbare displays bekijken en de volledige companioninterface op het onderste scherm openen. |
+| **More → Displays** | Displays beheren, de companioninterface openen en controllerbediening plus de globale Menu-shortcut configureren. |
 | **More → AI** | API-key beheren, DeepSeek-model kiezen, verbinding testen en antwoordlengte/kosten begrenzen. |
 | **More → Privacy** | Lokale data tellen, categorieën wissen, API-key verwijderen, back-up exporteren/importeren of de app volledig resetten. |
 
@@ -62,6 +62,16 @@ Een API-key is nooit in de APK of repository opgenomen. Iedere gebruiker voert z
 - Strenge spoilerstanden beperken bronfragmenten en verbergen Wiki-previews totdat je bewust de bron opent.
 - Alleen de veertien recentste chatberichten worden als context verzonden.
 - Met 512, 900 of 1500 maximale outputtokens bepaal je de balans tussen detail, snelheid en API-verbruik.
+
+## Controller-first gebruiken
+
+- D-pad of stick navigeert; **A** bevestigt en **B** gaat terug.
+- **L1/R1** wisselt tussen Ask, Wiki, Saved, Games en More.
+- **X** opent Quick Questions en **Y** opent dezelfde composer direct in trefwoordmodus.
+- Kies een categorie en actie om zonder typen een complete spoilerbewuste vraag te maken.
+- Voeg optioneel alleen een korte naam toe, bijvoorbeeld `Moonveil`, en bewaar samengestelde vragen als favoriet per game.
+- Open **More → Displays → Controller-first mode** om de globale shortcut in te stellen. Android Accessibility hoeft alleen controllerknoppen te observeren en leest geen scherminhoud.
+- Na kalibratie opent een lange druk op de gekozen Menu-knop GameSide op het tweede scherm. De korte druk blijft beschikbaar voor de game.
 
 ## Tweede scherm op de AYN Thor
 
@@ -79,7 +89,7 @@ Als Android geen bruikbaar tweede scherm rapporteert, kies je **Open single-scre
 - Notities, checklists, opgeslagen antwoorden en eerder gedownloade Wiki-pagina's werken lokaal.
 - Chatgeneratie en nieuwe Wiki-resultaten hebben internet nodig.
 - De API-key wordt AES/GCM-versleuteld met Android Keystore.
-- De app heeft geen advertenties, analytics, microfoon-, screenshot- of permanente achtergrondmonitoring.
+- De app heeft geen advertenties, analytics, microfoon- of screenshottoegang. Alleen de optionele controller-shortcutservice kan op de achtergrond gamepadknoppen observeren; scherminhoud wordt niet gelezen.
 - Via **More → Privacy → Export JSON** maak je een overdraagbare back-up van games, gesprekken, bronnen en persoonlijke tools.
 - API-keys en gedownloade Wiki-tekst worden nooit geëxporteerd.
 - Import controleert eerst de bestandsversie, grootte, waarden, HTTPS-links en onderlinge verwijzingen.

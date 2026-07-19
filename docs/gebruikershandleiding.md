@@ -1,13 +1,13 @@
 # GameSide AI gebruikershandleiding
 
-Deze handleiding beschrijft de `1.0.0-mvp` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
+Deze handleiding beschrijft de `1.1.0-controller` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
 
 ## 1. Downloaden en installeren op de AYN Thor
 
 1. Open Chrome op de Thor.
 2. Log in op GitHub met een account dat toegang heeft tot `bimberlotDEV/AYN-Thor-AI-assistent-second-screen`.
 3. Open de repository en ga naar `downloads`.
-4. Open `GameSideAI-1.0.0-mvp-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
+4. Open `GameSideAI-1.1.0-controller-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
 5. Bevestig de downloadwaarschuwing uitsluitend als bestandsnaam en repository kloppen.
 6. Open het bestand via de downloadmelding of de app Bestanden.
 7. Android vraagt mogelijk toestemming om onbekende apps vanuit Chrome of Bestanden te installeren. Sta dit tijdelijk toe.
@@ -77,6 +77,18 @@ Antwoordacties:
 
 De vraag is begrensd op 2.000 tekens. Alleen de veertien recentste berichten uit het gekozen gesprek worden aan DeepSeek meegegeven.
 
+### Vragen stellen met de controller
+
+1. Druk in **Ask** op **X** of kies **Quick**.
+2. Kies met D-pad/stick en A een categorie: Navigation, Boss/combat, Item/build, Quest/NPC, Puzzle/mechanic of Settings/performance.
+3. Kies de gewenste actie. Vragen die geen naam nodig hebben zijn direct klaar om te verzenden.
+4. Als een specifiek onderwerp nodig is, typ je alleen een kort trefwoord zoals `Moonveil`, `Margit` of de naam van een quest.
+5. Controleer de samengestelde vraag en kies **Send**.
+6. Kies **Favorite** om de volledige vraag onder de actieve game te bewaren.
+7. Gebruik de controller-follow-ups onder een antwoord voor een volgende stap, meer detail of een checklist.
+
+Standaardbediening: D-pad/stick navigeert, A bevestigt, B gaat terug, L1/R1 wisselt tabs, X opent Quick Questions en Y opent trefwoordmodus. Touch en gewone tekstinvoer blijven daarnaast werken.
+
 ## 6. Gesprekken beheren
 
 - Tik bovenaan op **New conversation** om met een lege context te beginnen. Er wordt pas een database-entry gemaakt wanneer je werkelijk een vraag verzendt.
@@ -118,6 +130,17 @@ Open **More → Displays**.
 
 Display-ID's kunnen na reboot of reconnect veranderen; de app selecteert op capabilities en gebruikt geen vast Thor-displaynummer.
 
+### Globale lange Menu-shortcut
+
+1. Open **More → Displays → Controller-first mode**.
+2. Kies **Open Android Accessibility settings** en schakel **GameSide controller shortcut** in.
+3. Ga terug en kies **Calibrate Menu button**.
+4. Houd de gewenste Menu-knop ingedrukt. GameSide bewaart de echte Android-keycode van de Thor en schakelt de shortcut in.
+5. Kies desgewenst 650, 800 of 1000 ms; 800 ms is de standaard.
+6. Vanuit een game opent een lange druk GameSide. Een korte druk blijft naar de game gaan.
+
+De Accessibility-service vraagt alleen controller-key filtering aan, leest geen scherminhoud en verbruikt geen microfoon. Zonder deze toestemming blijft controllerbediening binnen GameSide werken, maar kan de app niet vanuit een game met een globale knop worden geopend.
+
 ## 10. Een Android-game op het primaire scherm starten
 
 1. Vul bij het gameprofiel de exacte package name van een geïnstalleerde Android-game in.
@@ -137,7 +160,7 @@ Open **More → Privacy**.
 2. Selecteer een map en bestandsnaam in Androids documentkiezer.
 3. Bewaar het bestand buiten de app voordat je de app verwijdert of van signing key wisselt.
 
-De back-up bevat games, package-/Wiki-relaties, gesprekken, berichten, citations, opgeslagen antwoorden, notities, checklists en items. De API-key en gedownloade Wiki-tekst ontbreken altijd.
+De back-up bevat games, package-/Wiki-relaties, gesprekken, berichten, citations, opgeslagen antwoorden, notities, checklists, items en Quick Question-favorieten. De API-key en gedownloade Wiki-tekst ontbreken altijd.
 
 ### Importeren
 

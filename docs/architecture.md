@@ -25,6 +25,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 6. Saved answers, notes, checklists, and checklist items are stored under the active game in Room schema 4 and cascade when that game is deleted.
 7. Saved-answer citations are encoded as structured JSON inside the saved record so the bookmark remains independent if chat history is cleared.
 8. Retrieved wiki documents are stored per game in Room schema 5. Cached documents expire for network retrieval after seven days, remain visible offline, and cascade when their game is deleted.
+9. Controller Quick Question favorites are stored per game in Room schema 6, exported in JSON backups, and cascade when their game is deleted.
+10. Controller input is normalized in the device layer. A strictly limited optional Accessibility service observes only controller key events for the global long-press shortcut and cannot retrieve window content.
 9. `PrivacyRepository` combines Room counts with encrypted-credential presence and owns selective deletion. Full reset clears Room, encrypted preferences and their Android Keystore key, then DataStore so onboarding restarts.
 10. `BackupRepository` uses Android's user-selected document URIs. Versioned JSON contains profiles, relations, conversations, citations, and personal tools, but never credentials or cached article text. Import applies size, type, enum, URL, and foreign-key reference validation before one Room transaction merges records.
 11. Profile persistence uses Room `@Upsert`, avoiding SQLite `REPLACE` parent deletion and its unintended foreign-key cascades during edits or imports.
@@ -69,7 +71,7 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 
 - No app component is exported except the launcher activity.
 - Cloud backup is disabled; personal export happens only through the explicit Android document picker.
-- No sensitive Android permission is requested.
+- No microphone, camera, screenshot, location, contacts, or storage permission is requested. The optional controller shortcut uses Android's user-enabled `BIND_ACCESSIBILITY_SERVICE` flow with key-filtering capability and no window-content capability.
 - Game discovery is limited to launcher activities and explicit package names; `QUERY_ALL_PACKAGES` is not used.
 - Cleartext networking is disabled. DeepSeek and game-wiki traffic uses HTTPS.
 - No provider credentials, screenshots, notes, or analytics are collected. The submitted question and compact recent context leave the device only for the requested answer.

@@ -8,7 +8,7 @@
 - downloaded Wiki documents and UI/provider settings;
 - the DeepSeek credential, encrypted with AES/GCM using a non-exportable Android Keystore key.
 
-Android cloud backup is disabled. GameSide has no account, analytics SDK, advertising SDK, microphone permission, screenshot permission, background service, or continuous app monitoring.
+Android cloud backup is disabled. GameSide has no account, analytics SDK, advertising SDK, microphone permission, screenshot permission, or continuous screen monitoring. Version 1.1 adds an optional Accessibility service solely for filtering controller key events and opening the companion after a calibrated long press. It declares `canRetrieveWindowContent=false`, does not consume short presses, and can be disabled in Android settings.
 
 ## Data sent after an explicit question
 
@@ -27,4 +27,3 @@ JSON export excludes credentials and cached Wiki article text. Import accepts on
 ## Threat boundary
 
 GameSide protects secrets from accidental repository inclusion, normal app-file access, backups, and casual device inspection. It cannot protect data on a rooted/compromised device, a device unlocked by another person, malicious firmware, provider-account compromise, or content opened in an external browser. Keep the phone/handheld updated and protect the DeepSeek account with its available security controls.
-
