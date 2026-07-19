@@ -1,13 +1,13 @@
 # GameSide AI gebruikershandleiding
 
-Deze handleiding beschrijft de `1.1.0-controller` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
+Deze handleiding beschrijft de `1.1.1-companion-hotfix` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
 
 ## 1. Downloaden en installeren op de AYN Thor
 
 1. Open Chrome op de Thor.
 2. Log in op GitHub met een account dat toegang heeft tot `bimberlotDEV/AYN-Thor-AI-assistent-second-screen`.
 3. Open de repository en ga naar `downloads`.
-4. Open `GameSideAI-1.1.0-controller-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
+4. Open `GameSideAI-1.1.1-companion-hotfix-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
 5. Bevestig de downloadwaarschuwing uitsluitend als bestandsnaam en repository kloppen.
 6. Open het bestand via de downloadmelding of de app Bestanden.
 7. Android vraagt mogelijk toestemming om onbekende apps vanuit Chrome of Bestanden te installeren. Sta dit tijdelijk toe.
@@ -129,6 +129,18 @@ Open **More → Displays**.
 5. Als er geen tweede display is, gebruik je **Open single-screen companion**.
 
 Display-ID's kunnen na reboot of reconnect veranderen; de app selecteert op capabilities en gebruikt geen vast Thor-displaynummer.
+
+### Companion actief houden tijdens gamen
+
+1. Open **More → Displays** en schakel via de knop Android Accessibility in voor **GameSide controller shortcut**.
+2. Start de companion op het onderste display. Een nieuwe sessie zet **Keep companion active while gaming** standaard aan.
+3. Start een game op het bovenste scherm. Als Thor de onderste activity verwijdert, vraagt GameSide na 750 ms een gecontroleerd herstel op het actuele onderste display aan.
+4. Onder **Companion session** zie je Accessibility, sessiestatus, doel-display en herstelpogingen.
+5. Gebruik **Restore companion now** voor handmatig herstel. Na drie automatische pogingen per minuut stopt de lus; de lange Menu-shortcut blijft een handmatige fallback.
+6. Kies **Stop companion session** wanneer GameSide niet meer automatisch terug mag komen.
+7. Kies bij een fout **Copy diagnostics** en deel alleen die tekst. Het log bevat maximaal vijftig lifecycle-/displayevents en nooit vragen, API-keys, Wiki-inhoud of schermdata.
+
+Home of Recents opent GameSide niet geforceerd. Zonder Accessibility blijft de companion handmatig bruikbaar, maar is automatisch herstel na een gamestart niet beschikbaar.
 
 ### Globale lange Menu-shortcut
 

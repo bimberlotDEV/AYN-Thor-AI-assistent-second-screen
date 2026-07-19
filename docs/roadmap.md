@@ -1,6 +1,6 @@
 # GameSide AI roadmap
 
-Deze roadmap beschrijft de geplande ontwikkelrichting na `1.1.0-controller`. Versienummers geven de gewenste volgorde aan, niet een vaste releasedatum. Een fase is pas klaar wanneer de bijbehorende releasecriteria aantoonbaar zijn geslaagd.
+Deze roadmap beschrijft de geplande ontwikkelrichting vanaf `1.1.1-companion-hotfix`. Versienummers geven de gewenste volgorde aan, niet een vaste releasedatum. Een fase is pas klaar wanneer de bijbehorende releasecriteria aantoonbaar zijn geslaagd.
 
 ## Status
 
@@ -26,7 +26,21 @@ Beschikbaar als huidige testversie:
 - optionele, gekalibreerde lange Menu-shortcut zonder schermuitlezing;
 - Room-schema 6 en een direct downloadbare, test-key-signed APK.
 
-## 🛠 1.1.1 — Stabiliteit en databetrouwbaarheid
+## 🧪 1.1.1 — Companion lifecycle-hotfix
+
+Gebouwd en beschikbaar; fysieke Thor-acceptatie staat nog open:
+
+- persistente companion-sessie met `visible`, `temporarilyDisplaced`, `restoring` en `failed`;
+- `singleTop` companion-task en idempotent herstel op een opnieuw gevalideerd secundair display;
+- window-state-trigger zonder scherminhoud uit te lezen;
+- 750 ms herstelvertraging, vijf seconden cooldown en maximaal drie pogingen per minuut;
+- herstel na display reconnect en expliciete **Stop companion session**;
+- status, handmatig herstel en privacyveilig logboek van maximaal vijftig events onder Displays;
+- versiecode 3 en een direct downloadbare test-key-signed R8-APK.
+
+Releasegate: drie echte games boven, companion binnen twee seconden onder, plus Home/Recents, slaapstand, display uit/aan en expliciet stoppen op de fysieke Thor.
+
+## 🛠 1.1.2 — Stabiliteit en databetrouwbaarheid
 
 Eerst worden de open punten uit de [bug-audit](bug-audit.md) afgehandeld:
 

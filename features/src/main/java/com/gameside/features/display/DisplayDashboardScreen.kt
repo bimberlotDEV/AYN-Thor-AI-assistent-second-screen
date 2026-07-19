@@ -35,6 +35,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.Switch
 import com.gameside.device.CompanionLaunchResult
 import com.gameside.domain.display.DeviceDisplayInfo
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.ComponentName
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun DisplayDashboardRoute(
@@ -46,7 +53,9 @@ fun DisplayDashboardRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     DisplayDashboardScreen(
         state, onLaunchCompanion, onOpenSingleScreen, viewModel::setShortcutEnabled,
-        viewModel::startCalibration, viewModel::setLongPressMillis, modifier,
+        viewModel::startCalibration, viewModel::setLongPressMillis,
+        viewModel::setKeepCompanionActive, viewModel::restoreCompanionNow,
+        viewModel::stopCompanionSession, viewModel::diagnosticsText, modifier,
     )
 }
 
@@ -58,10 +67,23 @@ private fun DisplayDashboardScreen(
     onShortcutEnabled: (Boolean) -> Unit,
     onCalibrate: () -> Unit,
     onLongPressMillis: (Int) -> Unit,
+    onKeepCompanionActive: (Boolean) -> Unit,
+    onRestoreCompanion: () -> Unit,
+    onStopCompanion: () -> Unit,
+    diagnosticsText: () -> String,
     modifier: Modifier = Modifier,
 ) {
     var launchMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var accessibilityEnabled by remember { mutableStateOf(isAccessibilityEnabled(context)) }
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) accessibilityEnabled = isAccessibilityEnabled(context)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     fun describe(result: CompanionLaunchResult): String = when (result) {
         is CompanionLaunchResult.Success -> "Companion launch requested on display ${result.displayId}"
         is CompanionLaunchResult.Failure -> result.reason
@@ -108,6 +130,46 @@ private fun DisplayDashboardScreen(
             item {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("Companion session", style = MaterialTheme.typography.titleLarge)
+                        Text("Status: ${state.companionStatus} · Accessibility: ${if (accessibilityEnabled) "ready" else "disabled"}")
+                        Text("Target display: ${state.targetDisplayId ?: "none"} · restore attempts: ${state.restoreAttempts}/3")
+                        state.companionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(Modifier.weight(1f)) {
+                                Text("Keep companion active while gaming")
+                                Text(
+                                    if (accessibilityEnabled) "Restores GameSide on the lower display after a game opens above."
+                                    else "Enable Accessibility below for automatic restore; manual restore remains available.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            Switch(
+                                checked = state.keepCompanionActive,
+                                onCheckedChange = onKeepCompanionActive,
+                                enabled = state.companionSessionActive,
+                            )
+                        }
+                        Button(onClick = onRestoreCompanion, modifier = Modifier.fillMaxWidth()) { Text("Restore companion now") }
+                        OutlinedButton(
+                            onClick = onStopCompanion,
+                            enabled = state.companionSessionActive,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("Stop companion session") }
+                        OutlinedButton(
+                            onClick = {
+                                context.getSystemService(ClipboardManager::class.java)
+                                    .setPrimaryClip(ClipData.newPlainText("GameSide diagnostics", diagnosticsText()))
+                                launchMessage = "Privacy-safe diagnostics copied"
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("Copy diagnostics") }
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+            }
+            item {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text("Controller-first mode", style = MaterialTheme.typography.titleLarge)
                         Text("D-pad/stick navigates · A confirms · B returns · L1/R1 changes tabs · X opens Quick · Y opens keyword mode.")
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -135,6 +197,12 @@ private fun DisplayDashboardScreen(
                 Spacer(Modifier.height(24.dp))
             }
     }
+}
+
+private fun isAccessibilityEnabled(context: android.content.Context): Boolean {
+    val expected = ComponentName(context, "com.gameside.ai.ControllerShortcutService").flattenToString()
+    return Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        .orEmpty().split(':').any { it.equals(expected, ignoreCase = true) }
 }
 
 @Composable

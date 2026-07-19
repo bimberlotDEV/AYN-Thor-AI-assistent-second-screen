@@ -16,6 +16,7 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import com.gameside.device.ControllerInputRouter
+import com.gameside.device.CompanionSessionCoordinator
 import android.annotation.SuppressLint
 
 @AndroidEntryPoint
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var displayLauncher: SecondaryDisplayLauncher
     @Inject lateinit var gameLauncher: GameLauncher
     @Inject lateinit var controllerInput: ControllerInputRouter
+    @Inject lateinit var sessionCoordinator: CompanionSessionCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +59,8 @@ class MainActivity : ComponentActivity() {
 
     private fun launchCompanion(displayId: Int?): CompanionLaunchResult {
         val intent = Intent(this, CompanionActivity::class.java)
-        return displayLauncher.launch(this, intent, displayId)
+        val result = displayLauncher.launch(this, intent, displayId)
+        if (result is CompanionLaunchResult.Success) sessionCoordinator.startSession(result.displayId)
+        return result
     }
 }

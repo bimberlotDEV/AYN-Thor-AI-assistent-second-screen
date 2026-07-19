@@ -65,6 +65,8 @@ Hilt connects device and data implementations to their domain contracts at the a
 5. If no secondary display is available, the complete companion activity opens on the current display.
 6. A user-triggered mapped game launch explicitly targets `Display.DEFAULT_DISPLAY`.
 
+During an explicit companion session, `CompanionSessionCoordinator` persists the current target and exposes session state as a `StateFlow`. `CompanionActivity` reports visibility but does not terminate the session from ordinary lifecycle callbacks. The limited Accessibility service sends only normalized primary window changes; it never retrieves node text or window content. Eligible game/app changes schedule an idempotent restore through `SecondaryDisplayLauncher`, with a generation guard, cooldown and per-minute limit. Display reconnect always revalidates the target because display IDs are ephemeral. Home, Recents, system dialogs and launcher packages do not trigger automatic restore.
+
 Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed resolution affects behavior.
 
 ## Security decisions
@@ -74,7 +76,7 @@ Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed re
 - No microphone, camera, screenshot, location, contacts, or storage permission is requested. The optional controller shortcut uses Android's user-enabled `BIND_ACCESSIBILITY_SERVICE` flow with key-filtering capability and no window-content capability.
 - Game discovery is limited to launcher activities and explicit package names; `QUERY_ALL_PACKAGES` is not used.
 - Cleartext networking is disabled. DeepSeek and game-wiki traffic uses HTTPS.
-- No provider credentials, screenshots, notes, or analytics are collected. The submitted question and compact recent context leave the device only for the requested answer.
+- No provider credentials, screenshots, notes, or analytics are collected. Companion diagnostics retain at most fifty local lifecycle/display/restore events and exclude questions, API keys, Wiki content and screen data. The submitted question and compact recent context leave the device only for the requested answer.
 - Android backup remains disabled, so local profiles, settings, and encrypted values are not copied to cloud backup.
 - Every destructive privacy action requires explicit confirmation; category deletion preserves unrelated data.
 

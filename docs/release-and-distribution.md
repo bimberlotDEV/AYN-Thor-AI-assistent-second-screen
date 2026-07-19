@@ -2,7 +2,7 @@
 
 ## Install the currently published test APK
 
-The direct-download APK in `downloads/` is the minified `1.1.0-controller` test release. It is signed with the same local Android test/debug certificate as the previous private build so compatible test installations can be updated in place; it is not a long-term production-signed release.
+The direct-download APK in `downloads/` is the minified `1.1.1-companion-hotfix` test release. It is signed with the same local Android test/debug certificate as the previous private build so compatible test installations can be updated in place; it is not a long-term production-signed release.
 
 To install that published build without a PC, follow the Dutch [user guide](gebruikershandleiding.md). To build and install a development APK from source, use:
 
@@ -37,7 +37,7 @@ $env:GAMESIDE_KEY_PASSWORD = [Net.NetworkCredential]::new("", $keySecret).Passwo
 ./gradlew.bat clean lintDebug test assembleRelease
 ```
 
-With all four variables present, `app/build/outputs/apk/release/app-release.apk` is signed. Without them, Gradle intentionally produces `app-release-unsigned.apk` for R8 verification only.
+With all four variables present, `app/build/outputs/apk/release/app-release.apk` is signed. Without them, Gradle intentionally produces `app-release-unsigned.apk` for R8 verification only. `assembleBetaRelease` is the separate minified test-key-signed distribution path and must not be used as a production release.
 
 Verify before sharing:
 

@@ -40,10 +40,12 @@ For a partial multi-display check, enable **Developer options → Simulate secon
 2. Confirm diagnostics show both physical displays with plausible dimensions and density.
 3. Select the lower display and launch the companion.
 4. On the lower display, navigate through Ask, Wiki, Saved, Games, and More; enter text, scroll, and rotate/recreate the activity.
-5. Add the exact package name of a known installed game to its profile, then use the launch action in Games.
-6. Confirm the game appears on the primary display while the companion remains visible and touchable below.
-7. Switch focus between both displays and confirm neither task is unexpectedly moved.
-8. Disable/re-enable the lower display and confirm GameSide either restores there or offers the single-screen fallback without losing durable state.
-9. Repeat after process termination and under memory pressure.
+5. Enable the limited GameSide Accessibility service and confirm **Keep companion active while gaming** is on.
+6. Start at least three different games on the upper display, including games launched outside GameSide.
+7. Confirm GameSide returns below within two seconds while each game remains on the upper display.
+8. Test Home, Recents, sleep/wake, and lower-display off/on; confirm no task ping-pong or duplicate companion task appears.
+9. Disable/re-enable the lower display and confirm GameSide restores to the newly validated display ID or remains `temporarilyDisplaced` with manual fallback.
+10. Choose **Stop companion session**, start another game, and confirm GameSide no longer returns automatically.
+11. Repeat after process termination and under memory pressure.
 
-Record the display diagnostics and Android build number for any failure. Do not include personal app data in bug reports.
+For any failure, choose **More > Displays > Copy diagnostics** and record the Android build number. Do not include personal app data in bug reports.

@@ -2,18 +2,18 @@
 
 GameSide AI is een privé Android gaming-assistent voor de AYN Thor en andere Android-apparaten. Je speelt op het hoofdscherm en gebruikt **Ask, Wiki, opgeslagen antwoorden, notities en checklists** op het tweede scherm. Op een gewone telefoon werkt dezelfde app in single-screenmodus.
 
-> Huidige versie: **1.1.0 Controller test-build**<br>
+> Huidige versie: **1.1.1 Companion hotfix test-build**<br>
 > Getest op: Huawei P30 Lite, Android 9 en Androids gesimuleerde tweede display<br>
-> Fysieke AYN Thor-validatie: nog uit te voeren
+> Fysieke AYN Thor-validatie: oorspronkelijke lifecyclefout gereproduceerd; hotfix-acceptatietest nog uit te voeren
 
 ## Downloaden
 
 De repository is privé. Log daarom op de AYN Thor eerst in op GitHub met een account dat toegang heeft tot deze repository.
 
-### [Download GameSide AI 1.1.0 Controller APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.1.0-controller-test.apk)
+### [Download GameSide AI 1.1.1 Companion Hotfix APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.1.1-companion-hotfix-test.apk)
 
-Bestand: `GameSideAI-1.1.0-controller-test.apk`<br>
-SHA-256: `6C0263EF05C07A2924B31C637AF070CE990B9BF63A71A78A653B4C0ABAF12FBE`
+Bestand: `GameSideAI-1.1.1-companion-hotfix-test.apk`<br>
+SHA-256: `B0C99BE77F6948D3EAA8BCD9EADBB1E56C4657D632700D5635ED328A0E34EB95`
 
 Installeren zonder pc of USB:
 
@@ -48,7 +48,7 @@ Een API-key is nooit in de APK of repository opgenomen. Iedere gebruiker voert z
 | **Wiki** | De Wiki van de actieve game doorzoeken, bronpagina's openen en eerder opgehaalde pagina's offline bekijken. |
 | **Saved** | Opgeslagen AI-antwoorden, persoonlijke notities en offline checklists beheren. |
 | **Games** | Games toevoegen, zoeken, activeren, pinnen, bewerken, verwijderen en optioneel een gemapte Android-game op het primaire scherm starten. |
-| **More → Displays** | Displays beheren, de companioninterface openen en controllerbediening plus de globale Menu-shortcut configureren. |
+| **More → Displays** | Displays beheren, een actieve companion-sessie herstellen/stoppen, privacyveilige diagnostiek kopiëren en controllerbediening plus de globale Menu-shortcut configureren. |
 | **More → AI** | API-key beheren, DeepSeek-model kiezen, verbinding testen en antwoordlengte/kosten begrenzen. |
 | **More → Privacy** | Lokale data tellen, categorieën wissen, API-key verwijderen, back-up exporteren/importeren of de app volledig resetten. |
 
@@ -79,8 +79,9 @@ Een API-key is nooit in de APK of repository opgenomen. Iedere gebruiker voert z
 2. Ga naar **More → Displays**.
 3. Controleer of het ingebouwde en onderste scherm worden weergegeven.
 4. Kies bij het aanbevolen onderste scherm **Launch companion here**.
-5. Gebruik Ask, Wiki, Saved, Games en More op het onderste scherm.
-6. Voeg bij een Android-game eventueel de package name toe en gebruik in Games de startknop om deze op display 0 te openen.
+5. Schakel Android Accessibility in voor automatisch herstel wanneer Thor de onderste activity tijdens een gamestart verwijdert.
+6. Laat **Keep companion active while gaming** aan en gebruik Ask, Wiki, Saved, Games en More op het onderste scherm.
+7. Voeg bij een Android-game eventueel de package name toe en gebruik in Games de startknop om deze op display 0 te openen.
 
 Als Android geen bruikbaar tweede scherm rapporteert, kies je **Open single-screen companion**. Display-ID's zijn niet hardcoded en mogen na een herstart veranderen.
 
@@ -132,4 +133,4 @@ De debug-APK verschijnt in `app/build/outputs/apk/debug/app-debug.apk`. Release-
 
 ## Belangrijkste huidige beperking
 
-De volledige interface is gevalideerd op een telefoon, single-screen companion en een gesimuleerd tweede display. De fysieke AYN Thor moet nog bevestigen dat zijn firmware twee gelijktijdige activiteiten, touch op het onderste scherm, focuswisseling, display reconnect en game-launch op het bovenste scherm correct afhandelt. De exacte acceptatiestappen staan in [device-testing.md](docs/device-testing.md).
+De Thor-firmware bleek de onderste companion-task te verwijderen wanneer boven een game start. Versie 1.1.1 bewaart daarom expliciet een companion-sessie en herstelt die begrensd op het actuele secundaire display. De fysieke Thor moet nog bevestigen dat dit bij drie verschillende games, Home/Recents, slaapstand en display reconnect betrouwbaar werkt. De exacte acceptatiestappen staan in [device-testing.md](docs/device-testing.md).

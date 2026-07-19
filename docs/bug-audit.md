@@ -2,6 +2,8 @@
 
 Auditdatum: 18 juli 2026
 
+Update 19 juli 2026: de fysieke AYN Thor meldde een hoge lifecyclebug waarbij iedere gamestart de onderste companion-task verwijderde. Versie `1.1.1-companion-hotfix` bevat het defensieve sessie-/herstelmechanisme en lokale diagnostiek. De code-, JVM-, lint- en buildcontroles zijn groen; de bug blijft **in acceptatietest** totdat de beschreven drie-game Thor-matrix slaagt.
+
 Gecontroleerde codebasis: commit `47bd4bc` (`main`)
 
 Testtoestel: Huawei P30 Lite / MAR-LX1A / Android 9 (API 28)

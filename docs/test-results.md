@@ -139,3 +139,28 @@ Still required for the 1.1 hardware gate:
 - AYN Thor controller key calibration, global long-press delivery, focus routing, lower-display launch and real-game coexistence remain physical-device acceptance tests.
 
 The Huawei results validate the standards-based display/activity implementation but do not replace the AYN Thor acceptance gate.
+
+## Companion hotfix 1.1.1 build — 2026-07-19
+
+Trigger and diagnosis:
+
+- User testing on the physical AYN Thor established that launching any game on the upper display removed the entire lower `CompanionActivity` task and returned the lower display to the Thor launcher.
+- No game-profile selection or package-specific behavior was required to reproduce it. USB/ADB diagnostics were unavailable, so this release adds bounded, privacy-safe lifecycle diagnostics.
+
+Completed locally:
+
+- `CompanionActivity` changed from `singleTask` to a retained, separate `singleTop` task; every launch/restore uses `NEW_TASK`, `CLEAR_TOP`, and `SINGLE_TOP`.
+- A persisted session coordinator keeps the session active across normal `onStop`/`onDestroy` and same-process recreation until the user explicitly stops it.
+- The limited Accessibility service normalizes only window-state changes and retains `canRetrieveWindowContent=false`; GameSide, Android system UI, permission dialogs, and launcher/home packages are filtered.
+- Restore requests wait 750 ms, revalidate the target display, use a five-second cooldown, allow at most three automatic requests per minute, and use generation IDs to invalidate stale work.
+- Display removal leaves the session `temporarilyDisplaced`; display return selects a currently valid secondary display. Manual restore and the long controller shortcut remain fallbacks.
+- The Displays UI reports Accessibility/session/target status and exposes keep-active, manual restore, explicit stop, and a fifty-event privacy-safe diagnostics copy action.
+- JVM tests cover state retention until explicit stop, cooldown, the one-minute restore limit, manual fallback, launcher/system filtering, and target-display fallback after reconnect.
+- Full JVM tests, Android lint, debug assembly, minified R8 release assembly, and the minified test distribution build completed successfully. No Room schema change was needed; existing schema and backup regression tests remained green.
+- APK metadata reports version `1.1.1-companion-hotfix`, version code 3, minSdk 26, and targetSdk 36. APK Signature Scheme v2 verification passed with the existing Android test certificate.
+- Published APK size: 1,673,555 bytes. SHA-256: `B0C99BE77F6948D3EAA8BCD9EADBB1E56C4657D632700D5635ED328A0E34EB95`.
+
+Still required:
+
+- No Android device was available to ADB during this build, so the compiled Room/Keystore instrumentation suite was not rerun.
+- The physical Thor must run the three-game, two-second restore, no-game-migration, Home/Recents, sleep/wake, display reconnect, and explicit-stop acceptance matrix before the hardware bug can be marked closed.
