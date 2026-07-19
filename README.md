@@ -2,18 +2,18 @@
 
 GameSide AI is een privé Android gaming-assistent voor de AYN Thor en andere Android-apparaten. Je speelt op het hoofdscherm en gebruikt **Ask, Wiki, opgeslagen antwoorden, notities en checklists** op het tweede scherm. Op een gewone telefoon werkt dezelfde app in single-screenmodus.
 
-> Huidige versie: **1.1.2 Lower-screen test-build**<br>
+> Huidige versie: **1.1.3 Game detection test-build**<br>
 > Getest op: Huawei P30 Lite, Android 9 en Androids gesimuleerde tweede display<br>
-> Fysieke AYN Thor-validatie: automatische start beneden gereed; gelijktijdig GameSide beneden en game boven wordt door de Thor-firmware beëindigd
+> Fysieke AYN Thor-validatie: automatische start beneden plus primaire anchortask gereed; hertest met game boven vereist
 
 ## Downloaden
 
 De repository is privé. Log daarom op de AYN Thor eerst in op GitHub met een account dat toegang heeft tot deze repository.
 
-### [Download GameSide AI 1.1.2 Lower-screen APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.1.2-lower-screen-test.apk)
+### [Download GameSide AI 1.1.3 Game Detection APK](https://github.com/bimberlotDEV/AYN-Thor-AI-assistent-second-screen/raw/refs/heads/main/downloads/GameSideAI-1.1.3-game-detection-test.apk)
 
-Bestand: `GameSideAI-1.1.2-lower-screen-test.apk`<br>
-SHA-256: `8AFDC3C0AF3D428CA6706CEFF938E05D778D42636624891657BEA7CCC3ADFF11`
+Bestand: `GameSideAI-1.1.3-game-detection-test.apk`<br>
+SHA-256: `005A96C7B9D4D8F843B94E7542F424AE83C410682225507022FB1A8867C27822`
 
 Installeren zonder pc of USB:
 
@@ -47,7 +47,7 @@ Een API-key is nooit in de APK of repository opgenomen. Iedere gebruiker voert z
 | **Ask** | Gamegerichte vragen typen óf controller-first samenstellen, favorieten en vervolgvragen kiezen, streaming antwoorden stoppen, bronnen openen, antwoorden kopiëren, opnieuw proberen, opslaan of omzetten naar een checklist. |
 | **Wiki** | De Wiki van de actieve game doorzoeken, bronpagina's openen en eerder opgehaalde pagina's offline bekijken. |
 | **Saved** | Opgeslagen AI-antwoorden, persoonlijke notities en offline checklists beheren. |
-| **Games** | Games toevoegen, zoeken, activeren, pinnen, bewerken, verwijderen en optioneel een gemapte Android-game op het primaire scherm starten. |
+| **Games** | Geïnstalleerde Android-games en emulatorapps detecteren, ROM-mappen scannen, profielen importeren, zoeken, activeren, pinnen, bewerken, verwijderen en gemapte apps boven starten. |
 | **More → Displays** | Controleren welk onderste display automatisch wordt gebruikt en controllerbediening plus de globale Menu-shortcut configureren. |
 | **More → AI** | API-key beheren, DeepSeek-model kiezen, verbinding testen en antwoordlengte/kosten begrenzen. |
 | **More → Privacy** | Lokale data tellen, categorieën wissen, API-key verwijderen, back-up exporteren/importeren of de app volledig resetten. |
@@ -131,4 +131,4 @@ De debug-APK verschijnt in `app/build/outputs/apk/debug/app-debug.apk`. Release-
 
 ## Belangrijkste huidige beperking
 
-De Thor-firmware verwijdert GameSide van het onderste scherm wanneer een game op het bovenste scherm start. De automatische herstelfunctie is daarom uit het product verwijderd. Versie 1.1.2 opent GameSide altijd direct beneden wanneer het onderste display beschikbaar is, maar kan deze firmwarebeperking tijdens een actieve game niet omzeilen. GameSide boven met een game beneden werkt volgens de huidige gebruikerstest wel.
+De Thor bleek vooral instabiel wanneer GameSide beneden als eerste task werd geopend en daarna pas boven een app of game startte. Versie 1.1.3 houdt daarom een onzichtbare, lege primaire anchortask achter de huidige bovenste app/launcher voordat GameSide beneden actief blijft. Dit bootst de stabielere volgorde “eerst boven, daarna GameSide beneden” na zonder scherminhoud te lezen. De fysieke Thor moet nog bevestigen dat dit de sporadische sluiting volledig oplost.

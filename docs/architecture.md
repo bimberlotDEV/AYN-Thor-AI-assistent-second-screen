@@ -65,7 +65,11 @@ Hilt connects device and data implementations to their domain contracts at the a
 5. If no secondary display is available, the complete companion activity opens on the current display.
 6. A user-triggered mapped game launch explicitly targets `Display.DEFAULT_DISPLAY`.
 
-The launcher checks its current display on every start. When launched on display 0 and a secondary display is available, `SecondaryDisplayLauncher` immediately opens the complete interface there and finishes the temporary primary activity. When GameSide already starts on a secondary display, it stays there. There is no persisted companion session or background restore loop.
+The launcher checks its current display on every start. When launched on display 0 and a secondary display is available, `SecondaryDisplayLauncher` immediately opens the complete interface there and moves the lightweight primary router task behind the current upper content. When GameSide already starts on a secondary display, it stays there and creates an equivalent empty primary anchor. There is no persisted companion session or background restore loop.
+
+On the Thor, the primary router task is moved behind the current upper app instead of being destroyed. A lower-origin launch creates the same empty primary anchor explicitly. This preserves the task ordering that physical feedback found stable without drawing an overlay, reading another app, or running a restore loop.
+
+`AndroidGameDiscoveryRepository` queries only launcher-visible apps. Android `CATEGORY_GAME` identifies native games; a bounded package/label classifier identifies emulator apps. ROM discovery is opt-in through a persisted Storage Access Framework tree URI, recursively bounded to 2,000 supported files and ten directory levels. Imported profiles use deterministic discovery IDs; ROM launch mapping remains optional because emulator intent contracts are not standardized.
 
 Display IDs are treated as ephemeral. No AYN model name, display ID, or fixed resolution affects behavior.
 

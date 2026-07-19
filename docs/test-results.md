@@ -187,3 +187,27 @@ Completed locally:
 Open hardware limitation:
 
 - Thor firmware still closes GameSide below when an upper-screen game takes over. This release makes reopening GameSide below automatic and predictable but does not claim simultaneous coexistence in that orientation.
+
+## Game detection and primary-anchor build 1.1.3 — 2026-07-20
+
+Implemented:
+
+- Native discovery queries launcher-visible apps and imports apps Android classifies with `ApplicationInfo.CATEGORY_GAME`.
+- A bounded label/package classifier recognizes common emulator families including RetroArch, PPSSPP, Dolphin, Citra/Azahar/Lime3DS, Yuzu/Sudachi, NetherSX2/AetherSX2, DuckStation, DraStic/melonDS, Mupen64, Redream/Flycast, MAME, Lemuroid and Vita3K.
+- The Games screen automatically scans installed games/emulators, supports manual refresh, filters already imported package names/titles, and provides individual or import-all actions.
+- The opt-in Storage Access Framework folder picker persists read access only to the selected ROM tree. Scanning is capped at ten directory levels and 2,000 supported ROMs and does not request storage permission.
+- ROM profiles support disc, cartridge, handheld and compressed extensions. Compatible installed emulator packages are associated by extension/folder hint where possible; generic formats fall back to RetroArch/Lemuroid when installed.
+- Imported discoveries use deterministic IDs, default to minimal spoiler protection, and preserve normal editable game-profile behavior.
+- `MainActivity` now remains as an excluded, background primary router task after launching GameSide below. Lower-origin launches create an equivalent transparent primary anchor. This targets the physical observation that Thor is stable when a primary task exists before the lower GameSide activity.
+
+Validation:
+
+- New unit coverage passes for lower-screen routing, emulator classification (including a Temu false-positive regression), extension-to-emulator mapping and missing-emulator fallback.
+- Full JVM tests, debug lint, debug assembly, Room/Keystore instrumentation APK compilation, minified R8 release and minified test-key-signed beta build passed.
+- APK metadata reports `1.1.3-game-detection`, version code 5, minSdk 26 and targetSdk 36. APK size: 1,663,547 bytes.
+- APK SHA-256: `005A96C7B9D4D8F843B94E7542F424AE83C410682225507022FB1A8867C27822`.
+
+Physical acceptance still required:
+
+- Open GameSide below first, then launch at least three apps/games above and verify that the primary anchor prevents the intermittent lower activity closure.
+- Verify installed Android-game and emulator detection against the actual Thor library, then select a real ROM directory and inspect title/emulator mapping. Directly launching a specific ROM is not claimed because emulator intent APIs differ.

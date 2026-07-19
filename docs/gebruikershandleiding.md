@@ -1,13 +1,13 @@
 # GameSide AI gebruikershandleiding
 
-Deze handleiding beschrijft de `1.1.2-lower-screen` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
+Deze handleiding beschrijft de `1.1.3-game-detection` test-build. Je hebt geen pc of USB-kabel nodig wanneer je de APK vanuit de privé GitHub-repository downloadt.
 
 ## 1. Downloaden en installeren op de AYN Thor
 
 1. Open Chrome op de Thor.
 2. Log in op GitHub met een account dat toegang heeft tot `bimberlotDEV/AYN-Thor-AI-assistent-second-screen`.
 3. Open de repository en ga naar `downloads`.
-4. Open `GameSideAI-1.1.2-lower-screen-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
+4. Open `GameSideAI-1.1.3-game-detection-test.apk` en kies **Download raw file**, of gebruik de downloadlink in de README.
 5. Bevestig de downloadwaarschuwing uitsluitend als bestandsnaam en repository kloppen.
 6. Open het bestand via de downloadmelding of de app Bestanden.
 7. Android vraagt mogelijk toestemming om onbekende apps vanuit Chrome of Bestanden te installeren. Sta dit tijdelijk toe.
@@ -56,6 +56,18 @@ Open **Games** en tik op `+`.
 - Kies de gewenste spoilerstand.
 
 Na opslaan wordt de eerste game automatisch actief. Bij meerdere games tik je op de gewenste kaart totdat **ACTIVE GAME** wordt getoond. Met de andere knoppen kun je een game pinnen, bewerken of na bevestiging inclusief gekoppelde data verwijderen.
+
+### Games automatisch detecteren
+
+Open **Games**. GameSide zoekt bij het openen automatisch naar geïnstalleerde Android-apps die Android als game classificeert en naar bekende emulatorapps zoals RetroArch, PPSSPP, Dolphin, Citra/Azahar, Yuzu/Sudachi, NetherSX2/AetherSX2, DuckStation en vergelijkbare emulators.
+
+- Kies **Detect apps** om opnieuw te zoeken na een installatie of update.
+- Gevonden apps verschijnen eerst onder **Detected games**; kies afzonderlijk **Import** of **Import all detected games**.
+- Reeds geïmporteerde package names en titels worden niet opnieuw voorgesteld.
+
+Voor losse emulatorgames kies je **Scan ROM folder** en selecteer je via Androids mapkiezer de hoofdmap met ROM's. GameSide scant maximaal 2.000 bestanden, ondersteunt onder andere ISO, CSO, CHD, CUE, RVZ, WBFS, 3DS, CIA, NSP, XCI, NDS, klassieke cartridgeformaten en ZIP/7Z, en koppelt een ROM-profiel waar mogelijk aan een geïnstalleerde geschikte emulator. De gekozen map geeft alleen leestoegang tot die map; GameSide vraagt geen algemene opslagtoegang.
+
+Een play-knop bij een geïmporteerde ROM opent momenteel de gekoppelde emulator boven. De exacte ROM automatisch binnen iedere emulator starten is niet universeel, omdat iedere emulator daarvoor een andere of geen externe launch-interface gebruikt.
 
 ## 5. Een vraag stellen
 
@@ -130,7 +142,7 @@ Open **More → Displays**.
 
 Display-ID's kunnen na reboot of reconnect veranderen; de app selecteert op capabilities en gebruikt geen vast Thor-displaynummer.
 
-De huidige Thor-firmware sluit GameSide beneden wanneer een game boven start. De eerdere automatische herstelfunctie kon deze firmwarebeperking niet betrouwbaar omzeilen en is verwijderd. Je kunt GameSide daarna opnieuw via het app-icoon of de lange Menu-shortcut beneden openen. De omgekeerde indeling, GameSide boven en een game beneden, werkte tijdens de gebruikerstest wel.
+De Thor was vooral instabiel wanneer GameSide beneden vóór de bovenste app werd geopend. GameSide houdt daarom een lege primaire anchortask achter de bovenste app/launcher terwijl de interface beneden draait. Zie je toch nog een sluiting, open GameSide opnieuw en meld welke app of game boven werd gestart.
 
 ### Globale lange Menu-shortcut
 
@@ -150,7 +162,7 @@ De Accessibility-service vraagt alleen controller-key filtering aan, leest geen 
 3. Tik op de startknop van die game.
 4. GameSide vraagt Android de launcheractivity expliciet op display 0 te openen.
 
-Voor een emulator-ROM, pc-stream of console-stream start je normaal de emulator/streamingapp zelf; de MVP kan geen individuele ROM binnen een emulator starten.
+Voor een gedetecteerde emulator-ROM opent de play-knop de gekoppelde emulator. Automatisch direct naar het gekozen ROM springen verschilt per emulator en is nog niet algemeen beschikbaar.
 
 ## 11. Back-up en import
 

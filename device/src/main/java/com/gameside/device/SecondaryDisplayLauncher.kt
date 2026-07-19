@@ -22,6 +22,8 @@ internal object LowerScreenLaunchPolicy {
 }
 
 class SecondaryDisplayLauncher @Inject constructor() {
+    fun isOnSecondaryDisplay(activity: Activity): Boolean = currentDisplayId(activity) != Display.DEFAULT_DISPLAY
+
     fun lowerDisplayFor(activity: Activity): Int? {
         return LowerScreenLaunchPolicy.targetDisplay(
             currentDisplayId(activity),

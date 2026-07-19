@@ -1,6 +1,6 @@
 # GameSide AI roadmap
 
-Deze roadmap beschrijft de geplande ontwikkelrichting vanaf `1.1.2-lower-screen`. Versienummers geven de gewenste volgorde aan, niet een vaste releasedatum. Een fase is pas klaar wanneer de bijbehorende releasecriteria aantoonbaar zijn geslaagd.
+Deze roadmap beschrijft de geplande ontwikkelrichting vanaf `1.1.3-game-detection`. Versienummers geven de gewenste volgorde aan, niet een vaste releasedatum. Een fase is pas klaar wanneer de bijbehorende releasecriteria aantoonbaar zijn geslaagd.
 
 ## Status
 
@@ -51,7 +51,18 @@ Resultaat: de Thor bleef GameSide beneden verwijderen zodra boven een game draai
 - lange Menu-shortcut opent direct op het onderste display;
 - firmwarebeperking voor game boven plus GameSide beneden duidelijk gedocumenteerd.
 
-## 🛠 1.1.3 — Stabiliteit en databetrouwbaarheid
+## 🧪 1.1.3 — Game detection en Thor task-order
+
+- automatische detectie van geïnstalleerde Android-games via de officiële Android-appcategorie;
+- detectie van bekende emulatorapps zonder `QUERY_ALL_PACKAGES`;
+- bewuste ROM-mapkeuze via Android Storage Access Framework, zonder algemene opslagpermission;
+- recursieve, begrensde ROM-scan en emulator-koppeling op bestandstype;
+- import per game of van alle detecties, met stabiele IDs en duplicaatfilter;
+- verborgen primaire anchortask om de stabiele Thor-startvolgorde na te bootsen.
+
+Hardwaregate: GameSide eerst beneden openen, daarna minimaal drie verschillende apps/games boven starten en bevestigen dat GameSide beneden blijft.
+
+## 🛠 1.1.4 — Stabiliteit en databetrouwbaarheid
 
 Eerst worden de open punten uit de [bug-audit](bug-audit.md) afgehandeld:
 

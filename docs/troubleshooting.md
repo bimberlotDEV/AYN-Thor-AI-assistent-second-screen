@@ -14,7 +14,7 @@ Open **Games** and tap the intended profile so it shows `ACTIVE GAME`. Context i
 
 ## A mapped game will not launch
 
-Edit the profile and enter the exact Android package name. Launch works only for an installed launcher activity. Emulated ROMs and streamed console/PC titles normally need to be started in their emulator or streaming app.
+Use **Games > Detect apps** first. If a game is not classified by Android, edit or create its profile and enter the exact package name. For emulator titles use **Scan ROM folder**; the play action opens a matched installed emulator when one can be identified.
 
 ## The second display is missing
 
@@ -22,7 +22,7 @@ Open **More > Displays** and inspect Android's reported displays. Reconnect or r
 
 ## GameSide disappears below when a game starts above
 
-The physical Thor currently removes a lower-screen GameSide activity whenever a game starts above. Version `1.1.2-lower-screen` no longer runs an automatic restore loop: reopen GameSide through its icon or the optional long Menu shortcut and it will target the lower display automatically. The tested reverse arrangement, GameSide above with a game below, does remain active. This is recorded as a Thor firmware compatibility limitation rather than a game-specific bug.
+Version `1.1.3-game-detection` keeps a lightweight invisible task on display 0 behind the user's current upper app/launcher. This mirrors the stable order in which something is opened above before GameSide starts below. If GameSide still closes, reopen it through its icon or long Menu shortcut and report the upper app/game and whether GameSide had been opened first.
 
 ## APK update is rejected
 
@@ -33,6 +33,6 @@ The new APK was signed by a different key or has an older/equal version code. Pr
 - Physical AYN Thor lower-screen touch, firmware focus/lid behavior, and simultaneous real-game operation still require the target hardware acceptance run.
 - Voice questions and user-triggered screenshot/vision help are intentionally post-MVP.
 - Wiki discovery currently targets compatible wiki.gg/Fandom/MediaWiki sites or a manually configured HTTPS Wiki.
-- Game launch automation covers mapped Android launcher packages, not individual emulator ROMs.
+- ROM detection can map profiles to emulator launcher packages, but direct per-ROM launching depends on emulator-specific APIs and is not universal.
 - Markdown markers in provider output may display as plain text; answers and links remain usable.
 - Cover-art picking, automatic foreground-game detection, cloud sync, accounts, game packs, payments, and social features are not part of this private MVP.

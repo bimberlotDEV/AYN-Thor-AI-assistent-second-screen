@@ -47,4 +47,15 @@ For a partial multi-display check, enable **Developer options → Simulate secon
 9. Confirm the reverse layout—GameSide above and a game below—continues to work as reported.
 10. Repeat after process termination and under memory pressure.
 
+### 1.1.3 task-order and discovery acceptance
+
+1. Cold-start with only the Thor launcher above, then open GameSide below first.
+2. Start three different upper apps/games and confirm GameSide remains below.
+3. Repeat with an upper app opened before GameSide and compare behavior.
+4. In **Games**, confirm **Detect apps** lists installed Android games and emulator apps but not ordinary shopping/system apps.
+5. Import one native game and one emulator; confirm duplicate detection hides both suggestions afterward.
+6. Choose **Scan ROM folder**, grant one ROM directory, and verify representative ISO/CSO/RVZ/CHD/NDS/ZIP titles.
+7. Confirm a ROM gets an emulator launcher only when a compatible installed emulator exists.
+8. Confirm GameSide never requests broad storage, microphone, camera or screenshot permission.
+
 Record the Android build number and exact display arrangement for any failure. Do not include personal app data in bug reports.

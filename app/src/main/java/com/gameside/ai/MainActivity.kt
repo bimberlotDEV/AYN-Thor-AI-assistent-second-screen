@@ -16,6 +16,8 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import com.gameside.device.ControllerInputRouter
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
+import android.view.Display
 
 @AndroidEntryPoint
 @SuppressLint("RestrictedApi")
@@ -23,17 +25,33 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var displayLauncher: SecondaryDisplayLauncher
     @Inject lateinit var gameLauncher: GameLauncher
     @Inject lateinit var controllerInput: ControllerInputRouter
+    private var contentRendered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        routeToLowerOrRender()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        routeToLowerOrRender()
+    }
+
+    private fun routeToLowerOrRender() {
         val lowerDisplayId = displayLauncher.lowerDisplayFor(this)
         if (lowerDisplayId != null) {
             val result = displayLauncher.launch(this, Intent(this, CompanionActivity::class.java), lowerDisplayId)
             if (result is com.gameside.device.CompanionLaunchResult.Success) {
-                finish()
+                // Keep this invisible primary task alive in the background. Thor is more stable when
+                // a primary task already exists before the lower-screen activity becomes active.
+                if (!moveTaskToBack(true)) finish()
                 return
             }
         }
+        if (displayLauncher.isOnSecondaryDisplay(this)) ensurePrimaryAnchor()
+        if (contentRendered) return
+        contentRendered = true
         enableEdgeToEdge()
         setContent {
             GameSideTheme {
@@ -41,6 +59,15 @@ class MainActivity : ComponentActivity() {
                     onLaunchGame = { packageName -> gameLauncher.launchOnPrimary(this, packageName) },
                 )
             }
+        }
+    }
+
+    private fun ensurePrimaryAnchor() {
+        val anchor = Intent(this, PrimaryAnchorActivity::class.java).addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+        )
+        runCatching {
+            startActivity(anchor, ActivityOptions.makeBasic().apply { launchDisplayId = Display.DEFAULT_DISPLAY }.toBundle())
         }
     }
 

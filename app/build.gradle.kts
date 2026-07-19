@@ -20,8 +20,8 @@ android {
         applicationId = providers.gradleProperty("GAME_SIDE_APPLICATION_ID").get()
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.1.2-lower-screen"
+        versionCode = 5
+        versionName = "1.1.3-game-detection"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -1,5 +1,8 @@
 package com.gameside.features.game
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +23,9 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.FolderOpen
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,16 +42,19 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gameside.domain.game.GamePlatform
+import com.gameside.domain.game.DiscoveredGame
 import com.gameside.domain.game.GameProfile
 import com.gameside.domain.game.SpoilerLevel
 import com.gameside.device.GameLaunchResult
@@ -57,6 +66,15 @@ fun GameLibraryRoute(
     viewModel: GameLibraryViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            viewModel.scanRomFolder(uri.toString())
+        }
+    }
     GameLibraryScreen(
         state = state,
         modifier = modifier,
@@ -66,6 +84,10 @@ fun GameLibraryRoute(
         onTogglePin = viewModel::togglePin,
         onDelete = viewModel::delete,
         onLaunchGame = onLaunchGame,
+        onRefreshDetection = viewModel::refreshDetectedGames,
+        onPickRomFolder = { folderPicker.launch(null) },
+        onImportDetected = viewModel::importDetected,
+        onImportAllDetected = viewModel::importAllDetected,
     )
 }
 
@@ -79,6 +101,10 @@ private fun GameLibraryScreen(
     onTogglePin: (GameProfile) -> Unit,
     onDelete: (GameProfile) -> Unit,
     onLaunchGame: (String) -> GameLaunchResult,
+    onRefreshDetection: () -> Unit,
+    onPickRomFolder: () -> Unit,
+    onImportDetected: (DiscoveredGame) -> Unit,
+    onImportAllDetected: () -> Unit,
 ) {
     var editing by remember { mutableStateOf<GameProfileDraft?>(null) }
     var deleting by remember { mutableStateOf<GameProfile?>(null) }
@@ -108,6 +134,44 @@ private fun GameLibraryScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onRefreshDetection, enabled = !state.isDetecting, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Rounded.Refresh, contentDescription = null)
+                        Text("  Detect apps")
+                    }
+                    Button(onClick = onPickRomFolder, enabled = !state.isDetecting, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Rounded.FolderOpen, contentDescription = null)
+                        Text("  Scan ROM folder")
+                    }
+                }
+                if (state.isDetecting) {
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CircularProgressIndicator(Modifier.height(24.dp))
+                        Text(state.discoveryMessage ?: "Detecting games…")
+                    }
+                } else state.discoveryMessage?.let {
+                    Spacer(Modifier.height(8.dp))
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+            if (state.discoveredGames.isNotEmpty()) {
+                item {
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Detected games", style = MaterialTheme.typography.titleLarge)
+                            Text("${state.discoveredGames.size} new profile${if (state.discoveredGames.size == 1) "" else "s"} ready to import.")
+                            Button(onClick = onImportAllDetected, modifier = Modifier.fillMaxWidth()) {
+                                Icon(Icons.Rounded.Download, contentDescription = null)
+                                Text("  Import all detected games")
+                            }
+                        }
+                    }
+                }
+                items(state.discoveredGames, key = { "detected:${it.stableKey}" }) { game ->
+                    DetectedGameCard(game) { onImportDetected(game) }
+                }
             }
             if (state.games.isEmpty()) {
                 item {
@@ -178,6 +242,20 @@ private fun GameLibraryScreen(
             text = { Text(message) },
             confirmButton = { TextButton(onClick = { launchMessage = null }) { Text("OK") } },
         )
+    }
+}
+
+@Composable
+private fun DetectedGameCard(game: DiscoveredGame, onImport: () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(Modifier.weight(1f)) {
+                Text(game.title, style = MaterialTheme.typography.titleMedium)
+                Text("${game.sourceLabel} · ${game.platform.name.lowercase().replace('_', ' ')}", style = MaterialTheme.typography.bodySmall)
+                game.packageName?.let { Text("Launcher: $it", style = MaterialTheme.typography.bodySmall) }
+            }
+            Button(onClick = onImport) { Text("Import") }
+        }
     }
 }
 

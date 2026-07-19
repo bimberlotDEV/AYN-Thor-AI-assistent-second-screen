@@ -2,13 +2,15 @@
 
 ## Data that remains on the device
 
-- game profiles, progress, spoiler settings, package mappings, and custom Wiki URLs;
+- game profiles, progress, spoiler settings, detected package mappings, imported ROM titles, and custom Wiki URLs;
 - conversations and their citations;
 - saved answers, notes, and checklists;
 - downloaded Wiki documents and UI/provider settings;
 - the DeepSeek credential, encrypted with AES/GCM using a non-exportable Android Keystore key.
 
-Android cloud backup is disabled. GameSide has no account, analytics SDK, advertising SDK, microphone permission, screenshot permission, or continuous screen monitoring. Version 1.1 adds an optional Accessibility service solely for filtering controller key events and opening the companion after a calibrated long press. It declares `canRetrieveWindowContent=false`, does not consume short presses, and can be disabled in Android settings.
+Android cloud backup is disabled. GameSide has no account, analytics SDK, advertising SDK, microphone permission, screenshot permission, broad storage permission, or continuous screen monitoring. Version 1.1 adds an optional Accessibility service solely for filtering controller key events and opening GameSide below after a calibrated long press. It declares `canRetrieveWindowContent=false`, does not consume short presses, and can be disabled in Android settings.
+
+Installed-game detection queries only apps with launcher activities. ROM scanning starts only after the user selects a directory through Android's Storage Access Framework, is read-only and bounded, and retains access only to that chosen tree. ROM file names become local game-profile titles; file contents are never uploaded or added to JSON backup.
 
 ## Data sent after an explicit question
 

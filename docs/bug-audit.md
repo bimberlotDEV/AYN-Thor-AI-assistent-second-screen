@@ -4,6 +4,8 @@ Auditdatum: 18 juli 2026
 
 Update 19 juli 2026: de fysieke AYN Thor verwijdert bij iedere bovenste gamestart de onderste GameSide-activity. De defensieve `1.1.1`-herstelfunctie bleek dit niet betrouwbaar te kunnen omzeilen. Op gebruikersverzoek verwijdert `1.1.2-lower-screen` de companion-sessie volledig en start GameSide voortaan automatisch beneden. Gelijktijdig GameSide beneden plus game boven blijft een vastgelegde Thor-firmwarebeperking; de omgekeerde indeling werkt wel.
 
+Update 20 juli 2026: gebruikersfeedback verfijnde het patroon: de sluiting is vooral mogelijk wanneer GameSide als eerste beneden opent; eerst een app boven openen voorkomt het probleem. `1.1.3-game-detection` houdt daarom een lege primaire task achter de bovenste content en creëert dezelfde anchor bij een lower-origin launch. Dit is lokaal compile-/lint-/unitgetest maar blijft **in fysieke acceptatietest**.
+
 Gecontroleerde codebasis: commit `47bd4bc` (`main`)
 
 Testtoestel: Huawei P30 Lite / MAR-LX1A / Android 9 (API 28)
