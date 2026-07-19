@@ -25,6 +25,10 @@ class DataStoreSettingsRepository @Inject constructor(
         val reducedMotion = booleanPreferencesKey("reduced_motion")
         val aiModel = stringPreferencesKey("ai_model")
         val maxAnswerTokens = intPreferencesKey("max_answer_tokens")
+        val controllerShortcutEnabled = booleanPreferencesKey("controller_shortcut_enabled")
+        val controllerShortcutKeyCode = intPreferencesKey("controller_shortcut_key_code")
+        val controllerShortcutLongPressMillis = intPreferencesKey("controller_shortcut_long_press_millis")
+        val controllerCalibrationPending = booleanPreferencesKey("controller_calibration_pending")
     }
 
     override val settings: Flow<AppSettings> = context.gameSideDataStore.data.map { preferences ->
@@ -35,6 +39,10 @@ class DataStoreSettingsRepository @Inject constructor(
             reducedMotion = preferences[Keys.reducedMotion] ?: false,
             aiModel = preferences[Keys.aiModel] ?: "deepseek-v4-flash",
             maxAnswerTokens = preferences[Keys.maxAnswerTokens] ?: 900,
+            controllerShortcutEnabled = preferences[Keys.controllerShortcutEnabled] ?: false,
+            controllerShortcutKeyCode = preferences[Keys.controllerShortcutKeyCode] ?: 108,
+            controllerShortcutLongPressMillis = preferences[Keys.controllerShortcutLongPressMillis] ?: 800,
+            controllerCalibrationPending = preferences[Keys.controllerCalibrationPending] ?: false,
         )
     }
 
@@ -64,6 +72,24 @@ class DataStoreSettingsRepository @Inject constructor(
     override suspend fun setMaxAnswerTokens(tokens: Int) {
         require(tokens in 256..4_096)
         context.gameSideDataStore.edit { it[Keys.maxAnswerTokens] = tokens }
+    }
+
+    override suspend fun setControllerShortcutEnabled(enabled: Boolean) {
+        context.gameSideDataStore.edit { it[Keys.controllerShortcutEnabled] = enabled }
+    }
+
+    override suspend fun setControllerShortcutKeyCode(keyCode: Int) {
+        require(keyCode in 1..1_000)
+        context.gameSideDataStore.edit { it[Keys.controllerShortcutKeyCode] = keyCode }
+    }
+
+    override suspend fun setControllerShortcutLongPressMillis(millis: Int) {
+        require(millis in 500..2_000)
+        context.gameSideDataStore.edit { it[Keys.controllerShortcutLongPressMillis] = millis }
+    }
+
+    override suspend fun setControllerCalibrationPending(pending: Boolean) {
+        context.gameSideDataStore.edit { it[Keys.controllerCalibrationPending] = pending }
     }
 
     override suspend fun clearAll() {

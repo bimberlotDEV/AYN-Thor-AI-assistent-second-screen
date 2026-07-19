@@ -16,8 +16,9 @@ import androidx.room.RoomDatabase
         GameChecklistEntity::class,
         ChecklistItemEntity::class,
         KnowledgeCacheEntity::class,
+        QuickQuestionFavoriteEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class GameSideDatabase : RoomDatabase() {
@@ -27,4 +28,5 @@ abstract class GameSideDatabase : RoomDatabase() {
     abstract fun knowledgeCacheDao(): KnowledgeCacheDao
     abstract fun privacyDao(): PrivacyDao
     abstract fun backupDao(): BackupDao
+    abstract fun quickQuestionDao(): QuickQuestionDao
 }

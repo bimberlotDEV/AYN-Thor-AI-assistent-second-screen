@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.gameside.device.ControllerInputRouter
+import com.gameside.device.ControllerCommand
+import kotlinx.coroutines.flow.SharedFlow
 
 sealed interface HomeState {
     data object Loading : HomeState
@@ -21,7 +24,9 @@ sealed interface HomeState {
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    controllerInputRouter: ControllerInputRouter,
 ) : ViewModel() {
+    val controllerCommands: SharedFlow<ControllerCommand> = controllerInputRouter.commands
     val state: StateFlow<HomeState> = settingsRepository.settings
         .map { settings ->
             if (settings.onboardingComplete) HomeState.Content(settings) else HomeState.Onboarding

@@ -205,4 +205,21 @@ class GameSideDatabaseTest {
         assertEquals("Imported title", dao.observeById(original.id).first()?.profile?.title)
         assertEquals("existing-session", database.chatDao().observeLatestThread(original.id).first()?.session?.id)
     }
+
+    @Test
+    fun quickQuestionFavoritePersistsAndCascadesWithGame() = runBlocking {
+        val profile = GameProfileEntity(
+            id = "quick-game", title = "Quick Game", platform = "OTHER", coverImageUri = null,
+            spoilerLevel = "MINIMAL", currentArea = null, currentChapter = null, currentQuest = null,
+            customContext = null, customSystemPrompt = null, isPinned = false, isArchived = false,
+            createdAtEpochMillis = 1L, updatedAtEpochMillis = 1L,
+        )
+        dao.upsert(GameProfileWithRelations(profile, emptyList(), emptyList()))
+        val quickDao = database.quickQuestionDao()
+        quickDao.upsert(QuickQuestionFavoriteEntity("favorite", profile.id, "Next", "Where next?", "NAVIGATION", 0, 2L))
+
+        assertEquals("Where next?", quickDao.observe(profile.id).first().single().question)
+        dao.delete(profile.id)
+        assertEquals(0, quickDao.observe(profile.id).first().size)
+    }
 }

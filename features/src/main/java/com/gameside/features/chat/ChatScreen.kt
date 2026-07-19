@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,9 +62,15 @@ import com.gameside.domain.chat.ChatMessage
 import com.gameside.domain.chat.ChatRole
 import com.gameside.domain.chat.ChatSession
 import com.gameside.domain.knowledge.SourceCitation
+import com.gameside.domain.controller.QuestionCategory
 
 @Composable
-fun ChatRoute(modifier: Modifier = Modifier, viewModel: ChatViewModel = viewModel()) {
+fun ChatRoute(
+    modifier: Modifier = Modifier,
+    quickOpenToken: Int = 0,
+    keywordOpenToken: Int = 0,
+    viewModel: ChatViewModel = viewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     ChatScreen(
         state = state,
@@ -78,6 +85,11 @@ fun ChatRoute(modifier: Modifier = Modifier, viewModel: ChatViewModel = viewMode
         onRetryAnswer = viewModel::retryAnswer,
         onChecklist = viewModel::convertToChecklist,
         onDismissMessage = viewModel::dismissError,
+        onQuickQuestion = viewModel::sendQuickQuestion,
+        onSaveQuickFavorite = viewModel::saveQuickFavorite,
+        onDeleteQuickFavorite = viewModel::deleteQuickFavorite,
+        quickOpenToken = quickOpenToken,
+        keywordOpenToken = keywordOpenToken,
         modifier = modifier,
     )
 }
@@ -97,6 +109,11 @@ private fun ChatScreen(
     onRetryAnswer: (ChatMessage) -> Unit,
     onChecklist: (ChatMessage) -> Unit,
     onDismissMessage: () -> Unit,
+    onQuickQuestion: (String, QuestionCategory?) -> Unit,
+    onSaveQuickFavorite: (String, String, QuestionCategory) -> Unit,
+    onDeleteQuickFavorite: (String) -> Unit,
+    quickOpenToken: Int,
+    keywordOpenToken: Int,
     modifier: Modifier = Modifier,
 ) {
     val snackbar = remember { SnackbarHostState() }
@@ -105,6 +122,10 @@ private fun ChatScreen(
     var renameSession by remember { mutableStateOf<ChatSession?>(null) }
     var renameDraft by remember { mutableStateOf("") }
     var deleteSession by remember { mutableStateOf<ChatSession?>(null) }
+    var showQuick by remember { mutableStateOf(false) }
+    var startQuickWithKeyword by remember { mutableStateOf(false) }
+    LaunchedEffect(quickOpenToken) { if (quickOpenToken > 0 && state.game != null) { startQuickWithKeyword = false; showQuick = true } }
+    LaunchedEffect(keywordOpenToken) { if (keywordOpenToken > 0 && state.game != null) { startQuickWithKeyword = true; showQuick = true } }
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { snackbar.showSnackbar(it); onDismissMessage() }
     }
@@ -125,6 +146,7 @@ private fun ChatScreen(
                     }
                 },
                 actions = {
+                    TextButton(onClick = { startQuickWithKeyword = false; showQuick = true }, enabled = !state.isGenerating && state.game != null) { Text("Quick (X)") }
                     IconButton(onClick = onNewConversation, enabled = !state.isGenerating && state.game != null) {
                         Icon(Icons.Rounded.AddComment, contentDescription = "New conversation")
                     }
@@ -144,6 +166,8 @@ private fun ChatScreen(
             onSaveAnswer = onSaveAnswer,
             onRetryAnswer = onRetryAnswer,
             onChecklist = onChecklist,
+            onQuickQuestion = onQuickQuestion,
+            onOpenQuick = { startQuickWithKeyword = false; showQuick = true },
             onCopy = { message ->
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("GameSide AI answer", message.content))
@@ -178,6 +202,16 @@ private fun ChatScreen(
             dismissButton = { TextButton(onClick = { deleteSession = null }) { Text("Cancel") } },
         )
     }
+
+    if (showQuick && state.game != null) QuickQuestionDialog(
+        spoilerLevel = state.game.spoilerLevel,
+        favorites = state.quickFavorites,
+        startWithKeyword = startQuickWithKeyword,
+        onSend = onQuickQuestion,
+        onSaveFavorite = onSaveQuickFavorite,
+        onDeleteFavorite = onDeleteQuickFavorite,
+        onDismiss = { showQuick = false },
+    )
 }
 
 @Composable
@@ -198,6 +232,8 @@ private fun ChatContent(
     onSaveAnswer: (ChatMessage) -> Unit,
     onRetryAnswer: (ChatMessage) -> Unit,
     onChecklist: (ChatMessage) -> Unit,
+    onQuickQuestion: (String, QuestionCategory?) -> Unit,
+    onOpenQuick: () -> Unit,
     onCopy: (ChatMessage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -234,12 +270,21 @@ private fun ChatContent(
             if (state.streamingAnswer.isNotEmpty()) item("streaming") {
                 AssistantCard(state.streamingAnswer, state.streamingCitations, true, null, null, null, null)
             }
+            if (!state.isGenerating && messages.isNotEmpty()) item("follow-ups") {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Controller follow-ups", style = MaterialTheme.typography.labelLarge)
+                    state.followUpQuestions.forEach { followUp ->
+                        OutlinedButton(onClick = { onQuickQuestion(followUp, null) }, modifier = Modifier.fillMaxWidth()) { Text(followUp) }
+                    }
+                }
+            }
         }
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            OutlinedButton(onClick = onOpenQuick, enabled = !state.isGenerating) { Text("Quick") }
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = onDraftChange,

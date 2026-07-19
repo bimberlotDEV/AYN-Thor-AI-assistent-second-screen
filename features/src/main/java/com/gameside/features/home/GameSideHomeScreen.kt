@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,6 +35,7 @@ import com.gameside.features.game.GameLibraryRoute
 import com.gameside.features.onboarding.OnboardingScreen
 import com.gameside.features.personal.PersonalToolsRoute
 import com.gameside.features.wiki.WikiRoute
+import com.gameside.device.ControllerCommand
 
 @Composable
 fun GameSideHomeRoute(
@@ -50,7 +52,7 @@ fun GameSideHomeRoute(
             verticalArrangement = Arrangement.Center,
         ) { CircularProgressIndicator() }
         HomeState.Onboarding -> OnboardingScreen(onComplete = viewModel::completeOnboarding)
-        is HomeState.Content -> HomeContent(onLaunchCompanion, onOpenSingleScreen, onLaunchGame)
+        is HomeState.Content -> HomeContent(onLaunchCompanion, onOpenSingleScreen, onLaunchGame, viewModel)
     }
 }
 
@@ -59,8 +61,21 @@ private fun HomeContent(
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
     onLaunchGame: (String) -> GameLaunchResult,
+    viewModel: HomeViewModel,
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var quickOpenToken by rememberSaveable { mutableIntStateOf(0) }
+    var keywordOpenToken by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(viewModel) {
+        viewModel.controllerCommands.collect { command ->
+            when (command) {
+                ControllerCommand.OPEN_QUICK -> { selectedTab = 0; quickOpenToken++ }
+                ControllerCommand.OPEN_KEYWORD -> { selectedTab = 0; keywordOpenToken++ }
+                ControllerCommand.PREVIOUS_TAB -> selectedTab = (selectedTab + 4) % 5
+                ControllerCommand.NEXT_TAB -> selectedTab = (selectedTab + 1) % 5
+            }
+        }
+    }
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -100,7 +115,7 @@ private fun HomeContent(
         },
     ) { padding ->
         when (selectedTab) {
-            0 -> ChatRoute(Modifier.padding(padding))
+            0 -> ChatRoute(Modifier.padding(padding), quickOpenToken, keywordOpenToken)
             1 -> WikiRoute(Modifier.padding(padding))
             2 -> PersonalToolsRoute(Modifier.padding(padding))
             3 -> GameLibraryRoute(onLaunchGame, Modifier.padding(padding))

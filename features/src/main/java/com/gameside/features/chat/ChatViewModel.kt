@@ -22,6 +22,10 @@ import com.gameside.domain.personal.GameChecklist
 import com.gameside.domain.personal.ChecklistItem
 import com.gameside.domain.settings.AppSettings
 import com.gameside.domain.settings.SettingsRepository
+import com.gameside.domain.controller.QuestionCategory
+import com.gameside.domain.controller.QuickQuestionComposer
+import com.gameside.domain.controller.QuickQuestionFavorite
+import com.gameside.domain.controller.QuickQuestionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.util.UUID
@@ -49,10 +53,12 @@ data class GameChatState(
     val errorMessage: String? = null,
     val model: String = "deepseek-v4-flash",
     val maxAnswerTokens: Int = 900,
+    val quickFavorites: List<QuickQuestionFavorite> = emptyList(),
+    val followUpQuestions: List<String> = emptyList(),
 )
 
-private data class ChatContext(val settings: AppSettings, val game: GameProfile?, val sessions: List<ChatSession>, val thread: ChatThread?)
-private data class SessionSelection(val settings: AppSettings, val game: GameProfile, val sessions: List<ChatSession>, val sessionId: String?)
+private data class ChatContext(val settings: AppSettings, val game: GameProfile?, val sessions: List<ChatSession>, val thread: ChatThread?, val favorites: List<QuickQuestionFavorite>)
+private data class SessionSelection(val settings: AppSettings, val game: GameProfile, val sessions: List<ChatSession>, val sessionId: String?, val favorites: List<QuickQuestionFavorite>)
 private data class ChatInputs(
     val draft: String,
     val streaming: String,
@@ -79,6 +85,7 @@ class ChatViewModel @Inject constructor(
     private val provider: TextAiProvider,
     private val knowledgeRetriever: KnowledgeRetriever,
     private val personalTools: PersonalToolsRepository,
+    private val quickQuestions: QuickQuestionRepository,
 ) : ViewModel() {
     private val draft = MutableStateFlow("")
     private val streaming = MutableStateFlow("")
@@ -88,19 +95,20 @@ class ChatViewModel @Inject constructor(
     private val error = MutableStateFlow<String?>(null)
     private val selectedSessionId = MutableStateFlow<String?>(null)
     private val startFresh = MutableStateFlow(false)
+    private val lastQuickCategory = MutableStateFlow<QuestionCategory?>(null)
     private var generationJob: Job? = null
 
     private val context = settingsRepository.settings.flatMapLatest { settings ->
-        val gameId = settings.activeGameId ?: return@flatMapLatest flowOf(ChatContext(settings, null, emptyList(), null))
+        val gameId = settings.activeGameId ?: return@flatMapLatest flowOf(ChatContext(settings, null, emptyList(), null, emptyList()))
         games.observeById(gameId).flatMapLatest { game ->
-            if (game == null) flowOf(ChatContext(settings, null, emptyList(), null))
-            else combine(chats.observeSessions(gameId), selectedSessionId, startFresh) { sessions, selected, fresh ->
+            if (game == null) flowOf(ChatContext(settings, null, emptyList(), null, emptyList()))
+            else combine(chats.observeSessions(gameId), selectedSessionId, startFresh, quickQuestions.observeFavorites(gameId)) { sessions, selected, fresh, favorites ->
                 val sessionId = if (fresh) null else sessions.firstOrNull { it.id == selected }?.id ?: sessions.firstOrNull()?.id
-                SessionSelection(settings, game, sessions, sessionId)
+                SessionSelection(settings, game, sessions, sessionId, favorites)
             }.flatMapLatest { selection ->
                 selection.sessionId?.let { id ->
-                    chats.observeThread(id).map { ChatContext(selection.settings, selection.game, selection.sessions, it) }
-                } ?: flowOf(ChatContext(selection.settings, selection.game, selection.sessions, null))
+                    chats.observeThread(id).map { ChatContext(selection.settings, selection.game, selection.sessions, it, selection.favorites) }
+                } ?: flowOf(ChatContext(selection.settings, selection.game, selection.sessions, null, selection.favorites))
             }
         }
     }
@@ -116,7 +124,7 @@ class ChatViewModel @Inject constructor(
         )
     }
 
-    val state: StateFlow<GameChatState> = combine(context, inputs) { activeContext, inputs ->
+    val state: StateFlow<GameChatState> = combine(context, inputs, lastQuickCategory) { activeContext, inputs, category ->
         GameChatState(
             game = activeContext.game,
             thread = activeContext.thread,
@@ -129,6 +137,8 @@ class ChatViewModel @Inject constructor(
             errorMessage = inputs.error,
             model = activeContext.settings.aiModel,
             maxAnswerTokens = activeContext.settings.maxAnswerTokens,
+            quickFavorites = activeContext.favorites,
+            followUpQuestions = QuickQuestionComposer.followUps(category),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GameChatState())
 
@@ -142,8 +152,29 @@ class ChatViewModel @Inject constructor(
         if (snapshot.game == null) return
         val question = snapshot.draft.trim()
         if (question.isEmpty() || snapshot.isGenerating) return
+        lastQuickCategory.value = null
         sendQuestion(question)
     }
+
+    fun sendQuickQuestion(question: String, category: QuestionCategory?) {
+        if (question.isBlank()) return
+        lastQuickCategory.value = category
+        sendQuestion(question.trim().take(MAX_QUESTION_CHARS))
+    }
+
+    fun saveQuickFavorite(label: String, question: String, category: QuestionCategory) {
+        val gameId = state.value.game?.id ?: return
+        viewModelScope.launch {
+            quickQuestions.saveFavorite(
+                QuickQuestionFavorite(
+                    UUID.randomUUID().toString(), gameId, label.take(80), question.take(MAX_QUESTION_CHARS), category,
+                    state.value.quickFavorites.size, Instant.now(),
+                ),
+            )
+        }
+    }
+
+    fun deleteQuickFavorite(id: String) { viewModelScope.launch { quickQuestions.deleteFavorite(id) } }
 
     private fun sendQuestion(question: String) {
         val snapshot = state.value

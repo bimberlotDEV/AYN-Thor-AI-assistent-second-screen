@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GameSide AI</string>
+    <string name="controller_accessibility_description">Observes only game-controller buttons to open GameSide AI with a calibrated long press. It does not read screen content.</string>
 </resources>

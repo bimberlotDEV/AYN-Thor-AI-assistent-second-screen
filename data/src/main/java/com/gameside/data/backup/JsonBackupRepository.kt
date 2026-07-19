@@ -15,6 +15,7 @@ import com.gameside.data.database.GameProfileEntity
 import com.gameside.data.database.GameWikiSourceEntity
 import com.gameside.data.database.SavedAnswerEntity
 import com.gameside.data.database.SourceCitationEntity
+import com.gameside.data.database.QuickQuestionFavoriteEntity
 import com.gameside.domain.backup.BackupRepository
 import com.gameside.domain.backup.ImportResult
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -45,6 +46,7 @@ class JsonBackupRepository @Inject constructor(
             .put("notes", dao.notes().toArray(::noteJson))
             .put("checklists", dao.checklists().toArray(::checklistJson))
             .put("checklistItems", dao.checklistItems().toArray(::checklistItemJson))
+            .put("quickQuestionFavorites", dao.quickQuestionFavorites().toArray(::quickQuestionFavoriteJson))
         val uri = requireContentUri(destinationUri)
         context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter(StandardCharsets.UTF_8)?.use { it.write(root.toString(2)) }
             ?: error("Could not open the selected destination")
@@ -79,10 +81,15 @@ class JsonBackupRepository @Inject constructor(
             notes = root.safeArray("notes").mapObjects(::parseNote),
             checklists = root.safeArray("checklists").mapObjects(::parseChecklist),
             checklistItems = root.safeArray("checklistItems").mapObjects(::parseChecklistItem),
+            quickQuestionFavorites = root.optionalArray("quickQuestionFavorites").mapObjects(::parseQuickQuestionFavorite),
         )
         validateReferences(data)
         dao.importData(data)
-        ImportResult(data.games.size, data.sessions.size, data.savedAnswers.size + data.notes.size + data.checklists.size)
+        ImportResult(
+            data.games.size,
+            data.sessions.size,
+            data.savedAnswers.size + data.notes.size + data.checklists.size + data.quickQuestionFavorites.size,
+        )
     }
 
     private fun requireContentUri(value: String): Uri = Uri.parse(value).also {
@@ -99,6 +106,7 @@ class JsonBackupRepository @Inject constructor(
         require(data.messages.all { it.sessionId in sessionIds } && data.citations.all { it.messageId in messageIds }) { "Invalid conversation reference" }
         require(data.savedAnswers.all { it.gameProfileId in gameIds } && data.notes.all { it.gameProfileId in gameIds } && data.checklists.all { it.gameProfileId in gameIds }) { "Invalid personal-item game" }
         require(data.checklistItems.all { it.checklistId in checklistIds }) { "Invalid checklist reference" }
+        require(data.quickQuestionFavorites.all { it.gameProfileId in gameIds }) { "Invalid quick-question game" }
     }
 
     private fun gameJson(v: GameProfileEntity) = JSONObject().put("id", v.id).put("title", v.title).put("platform", v.platform)
@@ -121,6 +129,8 @@ class JsonBackupRepository @Inject constructor(
         .put("createdAt", v.createdAtEpochMillis).put("updatedAt", v.updatedAtEpochMillis)
     private fun checklistItemJson(v: ChecklistItemEntity) = JSONObject().put("id", v.id).put("checklistId", v.checklistId).put("text", v.text)
         .put("isChecked", v.isChecked).put("position", v.position)
+    private fun quickQuestionFavoriteJson(v: QuickQuestionFavoriteEntity) = JSONObject().put("id", v.id).put("gameProfileId", v.gameProfileId)
+        .put("label", v.label).put("question", v.question).put("category", v.category).put("position", v.position).put("createdAt", v.createdAtEpochMillis)
 
     private fun parseGame(o: JSONObject) = GameProfileEntity(
         o.required("id"), o.required("title"), o.requiredEnum("platform", PLATFORMS), o.nullable("coverImageUri"),
@@ -135,12 +145,17 @@ class JsonBackupRepository @Inject constructor(
     private fun parseNote(o: JSONObject) = GameNoteEntity(o.required("id"), o.required("gameProfileId"), o.required("title"), o.required("content", MAX_CONTENT), o.getLong("createdAt"), o.getLong("updatedAt"))
     private fun parseChecklist(o: JSONObject) = GameChecklistEntity(o.required("id"), o.required("gameProfileId"), o.required("title"), o.getLong("createdAt"), o.getLong("updatedAt"))
     private fun parseChecklistItem(o: JSONObject) = ChecklistItemEntity(o.required("id"), o.required("checklistId"), o.required("text"), o.getBoolean("isChecked"), o.getInt("position"))
+    private fun parseQuickQuestionFavorite(o: JSONObject) = QuickQuestionFavoriteEntity(
+        o.required("id"), o.required("gameProfileId"), o.required("label"), o.required("question", MAX_CONTENT),
+        o.requiredEnum("category", QUESTION_CATEGORIES), o.getInt("position"), o.getLong("createdAt"),
+    )
 
     private fun JSONObject.required(name: String, max: Int = MAX_SHORT): String = getString(name).also { require(it.isNotBlank() && it.length <= max) { "Invalid $name" } }
     private fun JSONObject.requiredHttps(name: String): String = required(name, 2_048).also { require(Uri.parse(it).scheme == "https") { "Invalid $name" } }
     private fun JSONObject.requiredEnum(name: String, allowed: Set<String>): String = required(name).also { require(it in allowed) { "Invalid $name" } }
     private fun JSONObject.nullable(name: String): String? = if (isNull(name)) null else required(name, MAX_CONTENT)
     private fun JSONObject.safeArray(name: String): JSONArray = getJSONArray(name).also { require(it.length() <= MAX_RECORDS) { "Too many $name records" } }
+    private fun JSONObject.optionalArray(name: String): JSONArray = optJSONArray(name)?.also { require(it.length() <= MAX_RECORDS) { "Too many $name records" } } ?: JSONArray()
     private fun <T> JSONArray.mapObjects(transform: (JSONObject) -> T): List<T> = List(length()) { transform(getJSONObject(it)) }
     private fun <T> List<T>.toArray(transform: (T) -> JSONObject) = JSONArray().also { array -> forEach { array.put(transform(it)) } }
 
@@ -154,5 +169,6 @@ class JsonBackupRepository @Inject constructor(
         val PLATFORMS = setOf("ANDROID", "EMULATED", "PC_STREAMING", "CONSOLE", "OTHER")
         val SPOILER_LEVELS = setOf("NONE", "MINIMAL", "MODERATE", "FULL")
         val ROLES = setOf("USER", "ASSISTANT")
+        val QUESTION_CATEGORIES = setOf("NAVIGATION", "BOSS", "ITEM", "QUEST", "PUZZLE", "SETTINGS")
     }
 }

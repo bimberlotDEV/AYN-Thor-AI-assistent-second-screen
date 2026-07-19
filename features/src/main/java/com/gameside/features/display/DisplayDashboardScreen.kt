@@ -29,6 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Switch
 import com.gameside.device.CompanionLaunchResult
 import com.gameside.domain.display.DeviceDisplayInfo
 
@@ -40,7 +44,10 @@ fun DisplayDashboardRoute(
     viewModel: DisplayDashboardViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    DisplayDashboardScreen(state, onLaunchCompanion, onOpenSingleScreen, modifier)
+    DisplayDashboardScreen(
+        state, onLaunchCompanion, onOpenSingleScreen, viewModel::setShortcutEnabled,
+        viewModel::startCalibration, viewModel::setLongPressMillis, modifier,
+    )
 }
 
 @Composable
@@ -48,9 +55,13 @@ private fun DisplayDashboardScreen(
     state: DisplayDashboardState,
     onLaunchCompanion: (Int) -> CompanionLaunchResult,
     onOpenSingleScreen: () -> CompanionLaunchResult,
+    onShortcutEnabled: (Boolean) -> Unit,
+    onCalibrate: () -> Unit,
+    onLongPressMillis: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var launchMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
     fun describe(result: CompanionLaunchResult): String = when (result) {
         is CompanionLaunchResult.Success -> "Companion launch requested on display ${result.displayId}"
         is CompanionLaunchResult.Failure -> result.reason
@@ -93,6 +104,35 @@ private fun DisplayDashboardScreen(
                     Text("  Open single-screen companion")
                 }
                 Spacer(Modifier.height(20.dp))
+            }
+            item {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("Controller-first mode", style = MaterialTheme.typography.titleLarge)
+                        Text("D-pad/stick navigates · A confirms · B returns · L1/R1 changes tabs · X opens Quick · Y opens keyword mode.")
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(Modifier.weight(1f)) {
+                                Text("Global long-press shortcut")
+                                Text("Only observes controller keys; screen content is never read.", style = MaterialTheme.typography.bodySmall)
+                            }
+                            Switch(checked = state.shortcutEnabled, onCheckedChange = onShortcutEnabled)
+                        }
+                        OutlinedButton(
+                            onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("Open Android Accessibility settings") }
+                        Button(onClick = onCalibrate, modifier = Modifier.fillMaxWidth()) {
+                            Text(if (state.calibrationPending) "Now hold the desired Menu button…" else "Calibrate Menu button")
+                        }
+                        Text("Current key code: ${state.shortcutKeyCode} · hold: ${state.longPressMillis} ms")
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(650, 800, 1_000).forEach { value ->
+                                OutlinedButton(onClick = { onLongPressMillis(value) }, enabled = state.longPressMillis != value) { Text("${value}ms") }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
             }
     }
 }

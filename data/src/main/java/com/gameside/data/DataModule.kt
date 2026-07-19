@@ -18,6 +18,8 @@ import com.gameside.data.personal.RoomPersonalToolsRepository
 import com.gameside.data.privacy.RoomPrivacyRepository
 import com.gameside.data.security.KeystoreCredentialStore
 import com.gameside.data.settings.DataStoreSettingsRepository
+import com.gameside.data.controller.RoomQuickQuestionRepository
+import com.gameside.domain.controller.QuickQuestionRepository
 import com.gameside.domain.game.GameProfileRepository
 import com.gameside.domain.backup.BackupRepository
 import com.gameside.domain.knowledge.GameKnowledgeProvider
@@ -50,6 +52,7 @@ abstract class DataBindingsModule {
     @Binds @Singleton abstract fun bindPersonalToolsRepository(value: RoomPersonalToolsRepository): PersonalToolsRepository
     @Binds @Singleton abstract fun bindPrivacyRepository(value: RoomPrivacyRepository): PrivacyRepository
     @Binds @Singleton abstract fun bindBackupRepository(value: JsonBackupRepository): BackupRepository
+    @Binds @Singleton abstract fun bindQuickQuestionRepository(value: RoomQuickQuestionRepository): QuickQuestionRepository
 }
 
 @Module
@@ -59,7 +62,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): GameSideDatabase =
         Room.databaseBuilder(context, GameSideDatabase::class.java, "gameside.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
             .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
 
@@ -80,6 +83,9 @@ object DatabaseModule {
 
     @Provides
     fun provideBackupDao(database: GameSideDatabase): com.gameside.data.database.BackupDao = database.backupDao()
+
+    @Provides
+    fun provideQuickQuestionDao(database: GameSideDatabase): com.gameside.data.database.QuickQuestionDao = database.quickQuestionDao()
 
     @Provides
     @Singleton
@@ -125,6 +131,13 @@ object DatabaseModule {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("""CREATE TABLE IF NOT EXISTS `knowledge_cache` (`gameProfileId` TEXT NOT NULL, `sourceApiUrl` TEXT NOT NULL, `pageId` TEXT NOT NULL, `title` TEXT NOT NULL, `sourceName` TEXT NOT NULL, `url` TEXT NOT NULL, `plainText` TEXT NOT NULL, `retrievedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`gameProfileId`, `sourceApiUrl`, `pageId`), FOREIGN KEY(`gameProfileId`) REFERENCES `game_profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""")
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_knowledge_cache_gameProfileId` ON `knowledge_cache` (`gameProfileId`)")
+        }
+    }
+
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""CREATE TABLE IF NOT EXISTS `quick_question_favorites` (`id` TEXT NOT NULL, `gameProfileId` TEXT NOT NULL, `label` TEXT NOT NULL, `question` TEXT NOT NULL, `category` TEXT NOT NULL, `position` INTEGER NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`gameProfileId`) REFERENCES `game_profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)""")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_quick_question_favorites_gameProfileId` ON `quick_question_favorites` (`gameProfileId`)")
         }
     }
 }

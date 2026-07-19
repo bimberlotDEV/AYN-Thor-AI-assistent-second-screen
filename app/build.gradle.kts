@@ -20,8 +20,8 @@ android {
         applicationId = providers.gradleProperty("GAME_SIDE_APPLICATION_ID").get()
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0-mvp"
+        versionCode = 2
+        versionName = "1.1.0-controller"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

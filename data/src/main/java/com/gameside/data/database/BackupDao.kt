@@ -17,6 +17,7 @@ abstract class BackupDao {
     @Query("SELECT * FROM game_notes") abstract suspend fun notes(): List<GameNoteEntity>
     @Query("SELECT * FROM game_checklists") abstract suspend fun checklists(): List<GameChecklistEntity>
     @Query("SELECT * FROM checklist_items") abstract suspend fun checklistItems(): List<ChecklistItemEntity>
+    @Query("SELECT * FROM quick_question_favorites") abstract suspend fun quickQuestionFavorites(): List<QuickQuestionFavoriteEntity>
 
     @Upsert protected abstract suspend fun upsertGames(values: List<GameProfileEntity>)
     @Upsert protected abstract suspend fun upsertPackages(values: List<GamePackageEntity>)
@@ -28,6 +29,7 @@ abstract class BackupDao {
     @Upsert protected abstract suspend fun upsertNotes(values: List<GameNoteEntity>)
     @Upsert protected abstract suspend fun upsertChecklists(values: List<GameChecklistEntity>)
     @Upsert protected abstract suspend fun upsertChecklistItems(values: List<ChecklistItemEntity>)
+    @Upsert protected abstract suspend fun upsertQuickQuestionFavorites(values: List<QuickQuestionFavoriteEntity>)
 
     @Transaction
     open suspend fun importData(data: BackupData) {
@@ -41,6 +43,7 @@ abstract class BackupDao {
         upsertNotes(data.notes)
         upsertChecklists(data.checklists)
         upsertChecklistItems(data.checklistItems)
+        upsertQuickQuestionFavorites(data.quickQuestionFavorites)
     }
 }
 
@@ -55,4 +58,5 @@ data class BackupData(
     val notes: List<GameNoteEntity>,
     val checklists: List<GameChecklistEntity>,
     val checklistItems: List<ChecklistItemEntity>,
+    val quickQuestionFavorites: List<QuickQuestionFavoriteEntity> = emptyList(),
 )

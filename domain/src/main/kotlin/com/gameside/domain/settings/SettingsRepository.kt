@@ -10,5 +10,9 @@ interface SettingsRepository {
     suspend fun setReducedMotion(enabled: Boolean)
     suspend fun setAiModel(model: String)
     suspend fun setMaxAnswerTokens(tokens: Int)
+    suspend fun setControllerShortcutEnabled(enabled: Boolean)
+    suspend fun setControllerShortcutKeyCode(keyCode: Int)
+    suspend fun setControllerShortcutLongPressMillis(millis: Int)
+    suspend fun setControllerCalibrationPending(pending: Boolean)
     suspend fun clearAll()
 }
